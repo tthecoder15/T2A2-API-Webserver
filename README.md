@@ -28,14 +28,20 @@ This API provides a free alternative to expensive competitors and, being publish
 
 ## R2. Describe the way tasks are allocated and tracked in your project
 
+For this project, I am using an Agile workflow supplemented by a Trello board as a digital Kanban board (Brede Moe et al., 2014). To do this, I split the overall tasks into smaller tasks and categorised them based on their urgency and impact on other tasks. I entered this information onto my project Trello board, divided my available time and added deadlines to the tasks. I then maintained this Trello board and documented my progress with screenshots at the end of each day. At the beginning of the following day, I reviewed my progress from the prior day, made any neccessary adjustments to the checklist and deadlines and prioritised the next cluster of tasks.
+
 ![Initial outline of tasks to complete](docs/1-task-outline.png)
-An initial prediction of the tasks I will need to complete to finish this project with an estimated urgency ranking.
+An initial list of the tasks required to complete the project with an estimated urgency assigned.
 
 ![Initial Trello Board](docs/agile-1.png)
-This is my initial Trello board that describes the Agile order of operations I will take to complete this project.
+A screenshot of the initialised Trello board.
 
 ![Initial Trello Board](docs/agile-2.png)
-This is my Trello board after one day of work.
+The Trello board after one day of work.
+
+### References
+
+Brede Moe, N., Dingsøyr, T., Dyba, T. (2014) 'Agile Project Management', in Ruhe, G., Wohlin, C. (eds.) _Software Project Management in a Changing World_. Berlin: Springer-Verlag, pp. 277-300.
 
 ## R6. Design an entity relationship diagram (ERD) for this app’s database, and explain how the relations between the diagrammed models will aid the database design
 
