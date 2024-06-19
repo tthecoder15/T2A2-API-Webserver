@@ -39,6 +39,9 @@ A screenshot of the initialised Trello board.
 ![Initial Trello Board](docs/agile-2.png)
 The Trello board after one day of work.
 
+![Initial Trello Board](docs/agile-3.png)
+The Trello board after two days of work.
+
 ### References
 
 Brede Moe, N., Dingsøyr, T., Dyba, T. (2014) 'Agile Project Management', in Ruhe, G., Wohlin, C. (eds.) _Software Project Management in a Changing World_. Berlin: Springer-Verlag, pp. 277-300.
@@ -71,3 +74,35 @@ Attendances are a join table created to enforce data normalisation. Attendance d
 ### References
 
 Abba, I (2022) _[Crow's Foot Notation – Relationship Symbols And How to Read Diagrams](https://www.freecodecamp.org/news/crows-foot-notation-relationship-symbols-and-how-to-read-diagrams/)_, FreeCodeCamp website, accessed 19 June 2024.
+
+## R8. Explain how to use this application’s API endpoints. Each endpoint should be explained, including the following data for each endpoint
+
+* HTTP verb
+* Path or route
+* Any required body or header data
+* Response
+
+### Users
+
+* UPDATE User
+* update password
+
+### Children
+
+GET Children
+* user auth
+* is_admin TRUE or is_teacher FALSE
+
+CREATE Child
+* user auth
+* is_admin TRUE or is_teacher FALSE
+
+DELETE Child
+* user auth
+* is_admin TRUE or is_teacher FALSE
+
+UPDATE Child
+* user auth
+* is_admin TRUE or is_teacher FALSE
+
+### Comments
