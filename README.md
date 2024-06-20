@@ -42,6 +42,9 @@ The Trello board after one day of work.
 ![Initial Trello Board](docs/agile-3.png)
 The Trello board after two days of work.
 
+![Initial Trello Board](docs/agile-4.png)
+The Trello board after three days of work.
+
 ### References
 
 Brede Moe, N., Dingsøyr, T., Dyba, T. (2014) 'Agile Project Management', in Ruhe, G., Wohlin, C. (eds.) _Software Project Management in a Changing World_. Berlin: Springer-Verlag, pp. 277-300.
