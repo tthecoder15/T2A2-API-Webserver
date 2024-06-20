@@ -84,25 +84,223 @@ Abba, I (2022) _[Crow's Foot Notation – Relationship Symbols And How to Read D
 
 ### Users
 
-* UPDATE User
-* update password
+GET User
+
+* GET
+* /Users OR /Users/<int:id>
+* JWT_Token where is_admin == True
+* Response: user_id, email, first_name, is_admin, is_teacher, 200/400, 401
+
+CREATE User
+
+* POST
+* /Users
+* Body: email, password, first_name
+* Response: Success: user created, 200/400
+
+UPDATE User
+
+* PATCH
+* /Users/<int:id>
+* JWT_Token JWT_Token where is_admin == True or get_JWT_identity == user.id
+* Body: email or password
+* Response: {Success: user updated, changed_field: new_value}, 200, 400, 401
+
+DELETE User
+
+* DELETE
+* /Users/<int:id>
+* JWT_Token JWT_Token where is_admin == True
+* Response: Success: user deleted, 200/400, 401
 
 ### Children
 
-GET Children
-* user auth
-* is_admin TRUE or is_teacher FALSE
+GET Child/Children
+
+* GET
+* /Children OR /Children/<int:id>
+* JWT_Token where is_admin == True, is_teacher == False or children.user_id == get_JWT_identity
+* Response: first_name, last_name, 200/400, 401
 
 CREATE Child
-* user auth
-* is_admin TRUE or is_teacher FALSE
+
+* POST
+* /Children
+* JWT_Token where is_admin == True, is_teacher == False
+* Body: first_name, last_name
+* Response: {Success: child registered, first_name, last_name}, 200/400, 401
 
 DELETE Child
-* user auth
-* is_admin TRUE or is_teacher FALSE
+
+* DELETE
+* /Children/<int:id>
+* JWT_Token where is_admin == True, or children.user_id == get_JWT_identity
+* Response: {Success: child deleted}
 
 UPDATE Child
-* user auth
-* is_admin TRUE or is_teacher FALSE
+
+* PUT
+* /children/<int:id>
+* JWT_Token where is_admin == True, or children.user_id == get_JWT_identity
+* Response: {Success: data updated, field_updated: value}, 200/400, 401
 
 ### Comments
+
+GET Comments
+
+* GET
+* /children/<int:id>/comments
+* JWT_Token where is_admin == True, is_teacher == True or children.user_id == get_JWT_identity
+* Response: date_created, urgency, children.first_name, children.last_name, message, 200/400, 401
+
+CREATE Comment
+
+* POST
+* /children/<int:id>/comments
+* JWT_Token where is_admin == True, is_teacher == True or children.user_id == get_JWT_identity
+* Response: {Success: comment posted, date_created, urgency, children.first_name, children.last_name, message}, 200/400, 401
+
+DELETE Comment
+
+* DELETE
+* /children/<int:id>/comments
+* JWT_Token where is_admin == True, or children.user_id == get_JWT_identity, or comment.user_id == get_JWT_identity
+* Response: {Success: comment deleted}, 200/400, 401
+
+UPDATE Comment
+
+* PATCH
+* /children/<int:id>/comments
+* JWT_Token where is_admin == True, or children.user_id == get_JWT_identity, or comment.user_id == get_JWT_identity
+* Body: comment_id
+* Response: {Success: comment updated, field_updated: new_value}, 200/400, 401
+
+### Teachers
+
+GET Teacher
+
+* GET
+* /teachers or teachers/<int:id>
+* JWT_Token where is_admin == True, is_teacher == True
+* Response: {teacher_id, first_name, email}, 200/400, 401
+
+CREATE Teacher
+
+* PUT
+* /teachers
+* JWT_Token where is_admin == True
+* Body: {first_name, email}
+* Response: {teacher_id, first_name, email}, 200/400, 401
+
+* is_admin == True
+
+UPDATE Teacher
+
+* PATCH
+* /teachers/<int:id>
+* JWT_Token where is_admin == True
+* Body: first_name or email
+* Response: {Success: teacher updated, updated_field: new_value}, 200/400, 401
+
+DELETE Teacher
+
+* DELETE
+* /teachers/<int:id>
+* JWT_Token where is_admin == True
+* Response: {Success: teacher deleted}, 200/400, 401
+
+### Contacts
+
+GET Contact
+
+* GET
+* /contacts/<int:id>
+* JWT_Token where is_admin == True, is_teacher == True or contact.user_id == get_JWT_identity
+* Response: contact_id, first_name, ph_number, emergency_cont, email, 200/400, 401
+
+CREATE Contact
+
+* POST
+* /contacts
+* JWT_Token where is_admin == True, is_teacher == False
+* Body: first_name, ph_number, emergency_cont, email (optional)
+* Response: {Success: contact registered, first_name, ph_number, emergency_cont, email}, 200/400, 401
+
+UPDATE Contact
+
+* PATCH
+* /contacts/<int:id>
+* JWT_Token where is_admin == True, or contact.user_id == get_JWT_identity
+* Body: updated_field: new_value
+* Response: {Success: contact updated, field_updated: new_value}, 200/400, 401
+
+DELETE Contact
+
+* DELETE
+* /contacts/<int:id>
+* JWT_Token where is_admin == True, or contact.user_id == get_JWT_identity
+* Response: {Success: contact deleted}, 200/400, 401
+
+### Groups
+
+GET Group
+
+* GET
+* /groups or groups/<int:id>
+* JWT_Token
+* Response: {name, teacher_id, day, teacher.first_name, teacher.email}, 200/400, 401
+
+CREATE Group
+
+* PUT
+* /groups
+* JWT_Token where is_admin == True
+* Body: {name, teacher_id, day}
+* Response: {Success: group created, {name, teacher_id, day}}, 200/400, 401
+
+UPDATE Group
+
+* PATCH
+* /groups/<int:id>
+* JWT_Token where is_admin == True
+* Body: {field_update: new_value}
+* Response: {Success: group updated, updated_field: new_value}, 200/400, 401
+
+DELETE Teacher
+
+* DELETE
+* /groups/<int:id>
+* JWT_Token where is_admin == True
+* Response: {Success: group deleted}, 200/400, 401
+
+### Attendances
+
+GET Attendance
+
+* GET
+* /children/attendances/<int:id>
+* JWT_Token where is_admin == True, is_teacher == True or children.user_id == get_JWT_identity
+* Response: {children.first_name, children.last_name}, {group.name, group.day}, {contact.first_name, contact.ph_number, contact.emergency_cont, contact.email}, 200/400, 401
+
+CREATE Attendance
+
+* POST
+* /children/attendances
+* JWT_Token where is_admin == True, is_teacher == False
+* Body: child_id, group_id, contact_id
+* Response: {Success: attendance registered, {children.first_name, children.last_name}, {group.name, group.day}, {contact.first_name, contact.ph_number, contact.emergency_cont, contact.email}}, 200/400, 401
+
+UPDATE Attendance
+
+* PATCH
+* /children/attendances/<int:id>
+* JWT_Token where is_admin == True, or child.user_id == get_JWT_identity
+* Body: updated_field: new_value
+* Response: {Success: contact updated, field_updated: new_value}, 200/400, 401
+
+DELETE Attendance
+
+* DELETE
+* /children/attendances/<int:id>
+* JWT_Token where is_admin == True, or child.user_id == get_JWT_identity
+* Response: {Success: attendance deleted}, 200/400, 401
