@@ -36,17 +36,20 @@ An initial list of the tasks required to complete the project with an estimated 
 ![Initial Trello Board](docs/agile-1.png)
 A screenshot of the initialised Trello board.
 
-![Initial Trello Board](docs/agile-2.png)
+![Trello Board screenshot after day 1](docs/agile-2.png)
 The Trello board after one day of work.
 
-![Initial Trello Board](docs/agile-3.png)
+![Trello Board screenshot after day 2](docs/agile-3.png)
 The Trello board after two days of work.
 
-![Initial Trello Board](docs/agile-4.png)
+![Trello Board screenshot after day 3](docs/agile-4.png)
 The Trello board after three days of work.
 
-![Initial Trello Board](docs/agile-5.png)
+![Trello Board screenshot after day 4](docs/agile-5.png)
 The Trello board after four days of work. During this day I made some adjustments to the timelines.
+
+![Trello Board screenshot after day 5](docs/agile-6.png)
+The Trello board after five days of work. Again, I made some adjustments to the task timelines today after recognising that some of the checklist items were too broad. During this day I initialised the APIs baseline interactions which could be reused in other scopes easily.
 
 ### References
 
@@ -118,6 +121,13 @@ DELETE User
 * /Users/<int:id>
 * JWT_Token JWT_Token where is_admin == True
 * Response: Success: user deleted, 200/400, 401
+
+LOGIN User
+
+* POST
+* /Users
+* Body: email, password
+* Response: Access_token: token_id, 200/400
 
 ### Children
 

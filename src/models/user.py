@@ -3,7 +3,7 @@ from init import db, ma
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Text, String, Boolean
 from marshmallow import fields
-from marshmallow.validate import Length
+from marshmallow.validate import Length, OneOf
 
 
 class User(db.Model):
@@ -15,26 +15,40 @@ class User(db.Model):
     is_admin: Mapped[bool] = mapped_column(Boolean(), server_default="false")
     is_teacher: Mapped[bool] = mapped_column(Boolean(), server_default="false")
 
-    children: Mapped[List['Child']] = relationship(back_populates='user', cascade='all, delete')
+    children: Mapped[List["Child"]] = relationship(
+        back_populates="user", cascade="all, delete"
+    )
 
-    comments: Mapped[List['Comment']] = relationship(back_populates='user', cascade='all, delete')
+    comments: Mapped[List["Comment"]] = relationship(
+        back_populates="user", cascade="all, delete"
+    )
 
-    contacts: Mapped[List['Contact']] = relationship(back_populates='user', cascade='all, delete')
+    contacts: Mapped[List["Contact"]] = relationship(
+        back_populates="user", cascade="all, delete"
+    )
+
 
 class UserSchema(ma.Schema):
     email = fields.Email(required=True)
     first_name = fields.String(required=True)
     password = fields.String(validate=Length(min=8), required=True)
-    
-    children=fields.Nested("ChildSchema", exclude=['user'])
-    
-    comments=fields.Nested("CommentSchema", exclude=['user'])
+    is_admin = fields.Boolean()
+    is_teacher = fields.Boolean()
 
-    contacts=fields.Nested("ContactSchema", exclude=['user'])
-
-
+    children = fields.List(
+        fields.Nested("ChildSchema", only=["first_name", "last_name"])
+    )
+    contacts = fields.List(fields.Nested("ContactSchema"))
 
     class Meta:
         ordered = True
-        fields = ("id", "email", "name", "is_admin", "password", "children", "contacts", "comments", )
-        load_only = ("id", "password", "is_teacher", "is_admin")
+        fields = (
+            "id",
+            "email",
+            "first_name",
+            "is_admin",
+            "is_teacher",
+            "password",
+            "children",
+            "contacts",
+        )

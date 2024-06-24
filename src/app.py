@@ -1,5 +1,7 @@
 from init import app
 from blueprints.cli_bp import cli_commands
+from blueprints.users_bp import users_bp
+from blueprints.children_bp import children_bp
 
 # from src.blueprints.attendances_bp import cli_commands
 
@@ -7,18 +9,21 @@ from marshmallow.exceptions import ValidationError
 from sqlalchemy.exc import IntegrityError
 
 app.register_blueprint(cli_commands)
+app.register_blueprint(users_bp)
+app.register_blueprint(children_bp)
 
 # app.register_blueprint(actors_bp)
 
 @app.route("/")
 def hello():
-    return {"message": "Welcome to Ripe Tomatoes API"}
+    return {"message": "Welcome to the ClassTracker API"}
 
 
 @app.errorhandler(405)
 @app.errorhandler(404)
 def not_found(err):
-    return {"Error": "no resource found"}
+    print(err)
+    return {"Error": "No resource found"}
 
 
 @app.errorhandler(ValidationError)

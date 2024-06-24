@@ -25,9 +25,9 @@ class CommentSchema(ma.Schema):
     date_created = fields.String(required=True)
     urgency = fields.String(validate= OneOf(["urgent", "positive", "neutral"]))
     
-    user = fields.Nested("UserSchema")
+    user = fields.Nested("UserSchema", only=['email'])
     child = fields.Nested("ChildSchema")
 
     class Meta:
         ordered = True
-        fields = ("child", "date_created", "urgency", "message")
+        fields = ("child", "user", "date_created", "urgency", "message")

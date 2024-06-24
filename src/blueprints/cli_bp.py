@@ -1,13 +1,13 @@
 from datetime import datetime
 from flask import Blueprint
 from init import db, bcrypt
-from models.users import User
-from models.children import Child
-from models.comments import Comment
-from models.teachers import Teacher
-from models.contacts import Contact
-from models.groups import Group
-from models.attendances import Attendance
+from models.user import User
+from models.child import Child
+from models.comment import Comment
+from models.teacher import Teacher
+from models.contact import Contact
+from models.group import Group
+from models.attendance import Attendance
 
 cli_commands = Blueprint("cli", __name__)
 

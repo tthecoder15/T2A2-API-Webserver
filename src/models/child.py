@@ -18,7 +18,6 @@ class Child(db.Model):
     comments: Mapped[List["Comment"]] = relationship(
         back_populates="children", cascade="all, delete"
     )
-
     attendances: Mapped[List["Attendance"]] = relationship(
         back_populates="children", cascade="all, delete"
     )
@@ -28,10 +27,12 @@ class ChildSchema(ma.Schema):
     first_name = fields.String(required=True)
     last_name = fields.String(required=True)
     
-    comments=fields.Nested("CommentSchema", exclude=["user", "child"])
+    user=fields.Nested("UserSchema", exclude=["password", "is_admin", "is_teacher"])
 
-    attendances=fields.Nested("AttendanceSchema", exclude=["child"])
+    comments=fields.List(fields.Nested("CommentSchema", exclude=['user', 'child']))
+    attendances=fields.List(fields.Nested("AttendanceSchema", only=['group']))
+
 
     class Meta:
         ordered = True
-        fields = ("id", "first_name", "last_name", "attendances", "comments")
+        fields = ("id", "user_id", "first_name", "last_name", "attendances", "comments")
