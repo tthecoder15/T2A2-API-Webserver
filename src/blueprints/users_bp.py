@@ -105,7 +105,7 @@ def user_signup():
 # UPDATE User
 @users_bp.route("/<int:id>", methods=["PATCH"])
 @jwt_required()
-def update_child(id):
+def update_user(id):
     user_id = get_jwt_identity()
     user_type = user_status(user_id)
     user = db.get_or_404(User, id)
@@ -114,8 +114,8 @@ def update_child(id):
         user.email = request.json.get("email", user.email)
         user.first_name = request.json.get("first_name", user.first_name)
         if user_type == "Admin":
-            user.is_admin = eval(str(request.json.get("is_admin", user.is_admin)).capitalize())
-            user.is_teacher = eval(str(request.json.get("is_teacher", user.is_teacher)).capitalize())
+            user.is_admin = str(request.json.get("is_admin", user.is_admin)).capitalize() in ["True"]
+            user.is_teacher = str(request.json.get("is_teacher", user.is_teacher)).capitalize() in ["True"]
         db.session.commit()
         return UserSchema().dump(user), 200
     else:
@@ -123,19 +123,19 @@ def update_child(id):
             "You are not authorised to access this resource", 401
         )
     
-# # DELETE Child
-# @children_bp.route("/<int:id>", methods=["DELETE"])
-# @jwt_required()
-# def delete_child(id):
-#     user_id = get_jwt_identity()
-#     user_type = user_status(user_id)
-#     child = db.get_or_404(Child, id)
+# DELETE User
+@users_bp.route("/<int:id>", methods=["DELETE"])
+@jwt_required()
+def delete_user(id):
+    user_id = get_jwt_identity()
+    user_type = user_status(user_id)
+    user = db.get_or_404(User, id)
     
-#     if user_type == "Admin" or child.user_id == user_id:
-#         db.session.delete(child)
-#         db.session.commit()
-#         return {"Success": "Child registration deleted"}, 200
-#     else:
-#         raise ValidationError(
-#             "You are not authorised to access this resource", 403
-#         )
+    if user_type == "Admin":
+        db.session.delete(user)
+        db.session.commit()
+        return {"Success": "User registration deleted"}, 200
+    else:
+        raise ValidationError(
+            "You are not authorised to access this resource", 403
+        )
