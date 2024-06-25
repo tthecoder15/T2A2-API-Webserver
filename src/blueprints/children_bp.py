@@ -105,21 +105,10 @@ def update_child(id):
     child = db.get_or_404(Child, id)
 
     if user_type == "Admin" or child.user_id == user_id:
-        if "first_name" not in request.json and "last_name" not in request.json:
-            raise ValidationError("Please provide a field to update", 400)
-        elif "first_name" in request.json and "last_name" in request.json:
-            child.first_name = request.json["first_name"]
-            child.last_name = request.json["last_name"]
-            print("2", child)
-        elif "first_name" in request.json and "last_name" not in request.json:
-            child.first_name = request.json["first_name"]
-            print("3", child)
-        elif "first_name" not in request.json and "last_name" in request.json:
-            child.last_name = request.json["last_name"]
-            print("4", child)
-        
+        child.first_name = request.json.get("first_name", child.first_name)
+        child.last_name = request.json.get("last_name", child.last_name)
         db.session.commit()
-        return ChildSchema().dump(child), 200       
+        return ChildSchema().dump(child), 200 
     
     else:
         raise ValidationError(
