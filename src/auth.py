@@ -13,7 +13,7 @@ def auth_check(user_id):
         raise ValidationError(
             "You must are not authorised to access this resource", 403
         )
-
+        
 
 def user_status(user_id):
     user = db.get_or_404(User, user_id)

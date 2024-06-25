@@ -10,7 +10,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 users_bp = Blueprint("user", __name__, url_prefix="/users")
 
-
+# READ All
 @users_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_users():
@@ -19,7 +19,7 @@ def get_users():
     users = db.session.scalars(stmt).all()
     return UserSchema(many=True, exclude=["password"]).dump(users)
 
-
+# READ One
 @users_bp.route("/<int:id>", methods=["GET"])
 @jwt_required()
 def get_user(id):
@@ -27,7 +27,7 @@ def get_user(id):
     user = db.get_or_404(User, id)
     return UserSchema(exclude=["password"]).dump(user)
 
-
+# LOGIN
 @users_bp.route("/signin", methods=["POST"])
 def login():
     if len(request.json["password"]) < 8:

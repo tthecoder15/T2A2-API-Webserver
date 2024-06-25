@@ -14,6 +14,7 @@ app.register_blueprint(children_bp)
 
 # app.register_blueprint(actors_bp)
 
+
 @app.route("/")
 def hello():
     return {"message": "Welcome to the ClassTracker API"}
@@ -33,12 +34,19 @@ def invalid_request(err):
 
 @app.errorhandler(IntegrityError)
 def integrity_error(err):
-    return {"Error": str(vars(err)['orig'])}, 400
+    return {"Error": str(vars(err)["orig"])}, 400
 
 
 @app.errorhandler(KeyError)
 def missing_key(err):
     return {"Error": f"Missing field: {str(err)}"}
+
+
+@app.errorhandler(TypeError)
+def incorrect_body(err):
+    return {
+        "Error": f"{str(err).capitalize()}, please check your request body's formatting"
+    }
 
 
 print(app.url_map)
