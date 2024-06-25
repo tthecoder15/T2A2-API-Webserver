@@ -11,7 +11,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 children_bp = Blueprint("child", __name__, url_prefix="/children")
 
-
+# READ Child
 @children_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_children():
@@ -44,7 +44,7 @@ def get_child(id):
         )
 
 
-# Register Child
+# CREATE Child
 @children_bp.route("/", methods=["POST"])
 @jwt_required()
 def register_movie():
@@ -123,5 +123,22 @@ def update_child(id):
     
     else:
         raise ValidationError(
-            "You must are not authorised to access this resource", 403
+            "You are not authorised to access this resource", 401
+        )
+    
+# DELETE Child
+@children_bp.route("/<int:id>", methods=["DELETE"])
+@jwt_required()
+def delete_child(id):
+    user_id = get_jwt_identity()
+    user_type = user_status(user_id)
+    child = db.get_or_404(Child, id)
+    
+    if user_type == "Admin" or child.user_id == user_id:
+        db.session.delete(child)
+        db.session.commit()
+        return {"Success": "Child registration deleted"}, 200
+    else:
+        raise ValidationError(
+            "You are not authorised to access this resource", 403
         )

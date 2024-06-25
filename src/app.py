@@ -29,7 +29,7 @@ def not_found(err):
 
 @app.errorhandler(ValidationError)
 def invalid_request(err):
-    return {"Error": vars(err)["messages"]}, 400
+    return {"Error": vars(err)["messages"]}, 403
 
 
 @app.errorhandler(IntegrityError)
