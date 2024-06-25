@@ -4,28 +4,31 @@ from models.user import User, UserSchema
 from flask_jwt_extended import create_access_token
 from init import db, bcrypt
 from marshmallow.exceptions import ValidationError
-from auth import auth_check, user_status
+from auth import admin_check, user_status
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
 users_bp = Blueprint("user", __name__, url_prefix="/users")
 
+
 # READ All User
 @users_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_users():
-    auth_check(get_jwt_identity())
+    admin_check(get_jwt_identity())
     stmt = db.select(User)
     users = db.session.scalars(stmt).all()
     return UserSchema(many=True, exclude=["password"]).dump(users)
+
 
 # READ One User
 @users_bp.route("/<int:id>", methods=["GET"])
 @jwt_required()
 def get_user(id):
-    auth_check(get_jwt_identity())
+    admin_check(get_jwt_identity())
     user = db.get_or_404(User, id)
     return UserSchema(exclude=["password"]).dump(user)
+
 
 # LOGIN
 @users_bp.route("/signin", methods=["POST"])
@@ -48,7 +51,7 @@ def login():
 @users_bp.route("/", methods=["POST"])
 @jwt_required()
 def signup_admin():
-    auth_check(get_jwt_identity())
+    admin_check(get_jwt_identity())
 
     # Check if email in db
     stmt = db.select(User).where(User.email == request.json["email"])
@@ -102,6 +105,7 @@ def user_signup():
     db.session.commit()
     return {"Success": UserSchema(only=["email", "first_name"]).dump(new_user)}, 201
 
+
 # UPDATE User
 @users_bp.route("/<int:id>", methods=["PATCH"])
 @jwt_required()
@@ -114,15 +118,18 @@ def update_user(id):
         user.email = request.json.get("email", user.email)
         user.first_name = request.json.get("first_name", user.first_name)
         if user_type == "Admin":
-            user.is_admin = str(request.json.get("is_admin", user.is_admin)).capitalize() in ["True"]
-            user.is_teacher = str(request.json.get("is_teacher", user.is_teacher)).capitalize() in ["True"]
+            user.is_admin = str(
+                request.json.get("is_admin", user.is_admin)
+            ).capitalize() in ["True"]
+            user.is_teacher = str(
+                request.json.get("is_teacher", user.is_teacher)
+            ).capitalize() in ["True"]
         db.session.commit()
         return UserSchema().dump(user), 200
     else:
-        raise ValidationError(
-            "You are not authorised to access this resource", 401
-        )
-    
+        raise ValidationError("You are not authorised to access this resource", 401)
+
+
 # DELETE User
 @users_bp.route("/<int:id>", methods=["DELETE"])
 @jwt_required()
@@ -130,12 +137,10 @@ def delete_user(id):
     user_id = get_jwt_identity()
     user_type = user_status(user_id)
     user = db.get_or_404(User, id)
-    
+
     if user_type == "Admin":
         db.session.delete(user)
         db.session.commit()
         return {"Success": "User registration deleted"}, 200
     else:
-        raise ValidationError(
-            "You are not authorised to access this resource", 403
-        )
+        raise ValidationError("You are not authorised to access this resource", 403)

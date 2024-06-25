@@ -29,7 +29,7 @@ class ChildSchema(ma.Schema):
     
     user=fields.Nested("UserSchema", exclude=["password", "is_admin", "is_teacher"])
 
-    comments=fields.List(fields.Nested("CommentSchema", exclude=['user', 'child']))
+    comments=fields.List(fields.Nested("CommentSchema", exclude=['child']))
     attendances=fields.List(fields.Nested("AttendanceSchema", only=['group']))
 
 

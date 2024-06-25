@@ -1,15 +1,14 @@
-from datetime import timedelta
 from flask import Blueprint, request
 from models.child import Child, ChildSchema
-from models.user import User, UserSchema
-from flask_jwt_extended import create_access_token
-from init import db, bcrypt
+from models.user import User
+from init import db
 from marshmallow.exceptions import ValidationError
-from auth import auth_check, user_status
+from auth import user_status
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
 children_bp = Blueprint("child", __name__, url_prefix="/children")
+
 
 # READ Child
 @children_bp.route("/", methods=["GET"])
@@ -108,13 +107,12 @@ def update_child(id):
         child.first_name = request.json.get("first_name", child.first_name)
         child.last_name = request.json.get("last_name", child.last_name)
         db.session.commit()
-        return ChildSchema().dump(child), 200 
-    
+        return ChildSchema().dump(child), 200
+
     else:
-        raise ValidationError(
-            "You are not authorised to access this resource", 401
-        )
-    
+        raise ValidationError("You are not authorised to access this resource", 401)
+
+
 # DELETE Child
 @children_bp.route("/<int:id>", methods=["DELETE"])
 @jwt_required()
@@ -122,12 +120,35 @@ def delete_child(id):
     user_id = get_jwt_identity()
     user_type = user_status(user_id)
     child = db.get_or_404(Child, id)
-    
+
     if user_type == "Admin" or child.user_id == user_id:
         db.session.delete(child)
         db.session.commit()
         return {"Success": "Child registration deleted"}, 200
     else:
+        raise ValidationError("You are not authorised to access this resource", 403)
+
+# READ Comments about child
+@children_bp.route("/<int:id>/comments", methods=["GET"])
+@jwt_required()
+def get_child_comments(id):
+    user_id = get_jwt_identity()
+    user_type = user_status(user_id)
+
+    child = db.get_or_404(Child, id)
+    child_dict = ChildSchema(only=["user_id", "first_name", "last_name", "comments"]).dump(child)
+
+    if user_type == "Admin" or user_type == "Teacher" or child_dict["user_id"] == user_id:
+        return child_dict
+    else:
         raise ValidationError(
-            "You are not authorised to access this resource", 403
-        )
+            "You must are not authorised to access this resource", 403)
+
+
+# READ Comment single about child
+
+# CREATE Comment about child
+
+# UPDATE Comment about child
+
+# DELETE Comment about child

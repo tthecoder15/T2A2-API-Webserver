@@ -1,10 +1,9 @@
-from models.user import User
 from init import db
 from marshmallow import ValidationError
 from models.user import User, UserSchema
 
 
-def auth_check(user_id):
+def admin_check(user_id):
     stmt = db.select(User).where(User.id == user_id, User.is_admin)
     user = db.session.scalar(stmt)
     if user:
