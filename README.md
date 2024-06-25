@@ -51,6 +51,9 @@ The Trello board after four days of work. During this day I made some adjustment
 ![Trello Board screenshot after day 5](docs/agile-6.png)
 The Trello board after five days of work. Again, I made some adjustments to the task timelines today after recognising that some of the checklist items were too broad. During this day I initialised the APIs baseline interactions which could be reused in other scopes easily.
 
+![Trello Board screenshot after day 6](docs/agile-7.png)
+The Trello board after six days of work. I added a new card to breakdown the task of finishing the API's endpoints.
+
 ### References
 
 Brede Moe, N., Dingsøyr, T., Dyba, T. (2014) 'Agile Project Management', in Ruhe, G., Wohlin, C. (eds.) _Software Project Management in a Changing World_. Berlin: Springer-Verlag, pp. 277-300.
