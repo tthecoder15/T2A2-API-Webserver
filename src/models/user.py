@@ -29,9 +29,9 @@ class User(db.Model):
 
 
 class UserSchema(ma.Schema):
-    email = fields.Email(required=True)
-    first_name = fields.String(required=True)
-    password = fields.String(validate=Length(min=8), required=True)
+    email = fields.Email()
+    first_name = fields.String()
+    password = fields.String(validate=Length(min=8))
     is_admin = fields.Boolean()
     is_teacher = fields.Boolean()
 

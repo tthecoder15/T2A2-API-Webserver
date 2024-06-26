@@ -24,9 +24,8 @@ class Contact(db.Model):
 
 
 class ContactSchema(ma.Schema):
-    first_name = fields.String(required=True)
     email = fields.Email()
-    ph_number = fields.String(validate=Length(min=10, max=10), required=True)
+    ph_number = fields.String(validate=Length(min=10, max=10))
 
     user = fields.Nested("UserSchema", exclude=["password", "is_admin", "is_teacher"])
 

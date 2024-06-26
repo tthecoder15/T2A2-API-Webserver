@@ -2,6 +2,7 @@ from init import app
 from blueprints.cli_bp import cli_commands
 from blueprints.users_bp import users_bp
 from blueprints.children_bp import children_bp
+from blueprints.teachers_bp import teachers_bp
 
 # from src.blueprints.attendances_bp import cli_commands
 
@@ -11,6 +12,7 @@ from sqlalchemy.exc import IntegrityError
 app.register_blueprint(cli_commands)
 app.register_blueprint(users_bp)
 app.register_blueprint(children_bp)
+app.register_blueprint(teachers_bp)
 
 # app.register_blueprint(actors_bp)
 
@@ -29,7 +31,7 @@ def not_found(err):
 
 @app.errorhandler(ValidationError)
 def invalid_request(err):
-    return {"Error": vars(err)["messages"]}, 403
+    return {"Error": vars(err)["messages"]}, 400
 
 
 @app.errorhandler(IntegrityError)
@@ -39,7 +41,7 @@ def integrity_error(err):
 
 @app.errorhandler(KeyError)
 def missing_key(err):
-    return {"Error": f"Missing field: {str(err)}"}, 403
+    return {"Error": f"Request is missing field: {str(err)}"}, 400
 
 
 @app.errorhandler(TypeError)

@@ -24,8 +24,8 @@ class Comment(db.Model):
 
 
 class CommentSchema(ma.Schema):
-    message = fields.String(required=True)
-    date_created = fields.String(required=True)
+    message = fields.String()
+    date_created = fields.String()
     urgency = fields.String(validate= OneOf(["urgent", "positive", "neutral"]))
     
     user = fields.Nested("UserSchema", only=['first_name', "id"])

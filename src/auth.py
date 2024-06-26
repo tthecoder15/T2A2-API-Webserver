@@ -1,5 +1,4 @@
 from init import db
-from marshmallow import ValidationError
 from models.user import User, UserSchema
 
 
@@ -9,9 +8,7 @@ def admin_check(user_id):
     if user:
         return True
     else:
-        raise ValidationError(
-            "You must are not authorised to access this resource", 403
-        )
+        return{"Error": "You are not authorised to access this resource"}, 403 
         
 
 def user_status(user_id):

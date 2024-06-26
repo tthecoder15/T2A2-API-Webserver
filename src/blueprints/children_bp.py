@@ -57,7 +57,6 @@ def register_child():
     child_info = ChildSchema(only=["first_name", "last_name"], unknown="exclude").load(
         request.json
     )
-
     new_child = Child(
         first_name=child_info["first_name"].capitalize(),
         last_name=child_info["last_name"].capitalize(),
@@ -102,6 +101,13 @@ def update_child(id):
     user_id = get_jwt_identity()
     user_type = user_status(user_id)
     child = db.get_or_404(Child, id)
+
+    new_info = ChildSchema(
+        only=["first_name", "last_name"],
+        unknown="exclude",
+    ).load(request.json)
+    if new_info == {}:
+        return {"Error": "Please provide at least one value to update"}, 400
 
     if user_type == "Admin" or child.user_id == user_id:
         child.first_name = request.json.get("first_name", child.first_name)
@@ -213,6 +219,13 @@ def post_comment(id):
 @jwt_required()
 def update_comment(id, id2):
     user_id = get_jwt_identity()
+
+    new_info = CommentSchema(
+        only=["message", "urgency"],
+        unknown="exclude",
+    ).load(request.json)
+    if new_info == {}:
+        return {"Error": "Please provide at least one value to update"}, 400
 
     comment = db.get_or_404(Comment, id2)
     comment_dict = CommentSchema().dump(comment)

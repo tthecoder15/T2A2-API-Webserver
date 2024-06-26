@@ -34,7 +34,7 @@ def get_user(id):
 @users_bp.route("/signin", methods=["POST"])
 def login():
     if len(request.json["password"]) < 8:
-        raise ValidationError("Incorrect email or password")
+        return{"Error": "Incorrect email or password"}, 400
     params = UserSchema(only=["email", "password"]).load(
         request.json, unknown="exclude"
     )
@@ -44,7 +44,7 @@ def login():
         token = create_access_token(identity=user.id, expires_delta=timedelta(hours=2))
         return {"token": token}
     else:
-        raise ValidationError("Incorrect email or password")
+        return{"Error": "Incorrect email or password"}, 403
 
 
 # Create User, admin auth
@@ -57,7 +57,7 @@ def signup_admin():
     stmt = db.select(User).where(User.email == request.json["email"])
     user = db.session.scalar(stmt)
     if user:
-        raise ValidationError("Email already registered. Please use a different email.")
+        return{"Error": "Email already registered. Please provide a unique email address"}, 400
 
     input_info = UserSchema(
         only=["email", "first_name", "password", "is_admin", "is_teacher"],
@@ -85,16 +85,20 @@ def signup_admin():
 @users_bp.route("/signup", methods=["POST"])
 def user_signup():
     # Check if email in db
-    stmt = db.select(User).where(User.email == request.json["email"])
-    user = db.session.scalar(stmt)
-    if user:
-        raise ValidationError("Email already registered. Please use a different email.")
-
     input_info = UserSchema(
         only=["email", "first_name", "password"],
         unknown="exclude",
     ).load(request.json)
 
+    if input_info == {}:
+        return {"Error": "Please 'email', 'first_name' and 'password' values"}, 400
+    
+    stmt = db.select(User).where(User.email == request.json["email"])
+    user = db.session.scalar(stmt)
+    
+    if user:
+        return {"Error": "Email already registered. Please provide a unique email address"}, 400
+        
     new_user = User(
         email=input_info["email"],
         password=bcrypt.generate_password_hash(input_info["password"]).decode("utf-8"),
@@ -114,6 +118,14 @@ def update_user(id):
     user_type = user_status(user_id)
     user = db.get_or_404(User, id)
 
+    new_info = UserSchema(
+        only=["email", "first_name", "is_admin", "is_teacher", "password"],
+        unknown="exclude",
+    ).load(request.json)
+    print("new_info")
+    if new_info == {}:
+        return {"Error": "Please provide at least one value to update"}, 400
+
     if user_type == "Admin" or user.id == user_id:
         user.email = request.json.get("email", user.email)
         user.first_name = request.json.get("first_name", user.first_name)
@@ -127,7 +139,7 @@ def update_user(id):
         db.session.commit()
         return UserSchema().dump(user), 200
     else:
-        raise ValidationError("You are not authorised to access this resource", 401)
+        return {"Error": "You are not authorised to access this resource"}, 403
 
 
 # DELETE User
@@ -143,4 +155,5 @@ def delete_user(id):
         db.session.commit()
         return {"Success": "User registration deleted"}, 200
     else:
-        raise ValidationError("You are not authorised to access this resource", 403)
+        return {"Error": "You are not authorised to access this resource"}, 403
+

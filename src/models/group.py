@@ -21,8 +21,8 @@ class Group(db.Model):
 
 
 class GroupSchema(ma.Schema):
-    group_name = fields.String(required=True)
-    day = fields.String(required=True)
+    group_name = fields.String()
+    day = fields.String()
 
     teacher = fields.Nested("TeacherSchema")
 

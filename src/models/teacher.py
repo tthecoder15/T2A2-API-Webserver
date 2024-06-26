@@ -17,9 +17,8 @@ class Teacher(db.Model):
     )
     
 class TeacherSchema(ma.Schema):
-    email = fields.Email(required=True)
 
-    groups=fields.Nested("GroupSchema", exclude=["teacher"])
+    groups=fields.List(fields.Nested("GroupSchema", exclude=['teacher']))
 
     class Meta:
-        fields = ("first_name", "email", "groups")
+        fields = ("id", "first_name", "email", "groups")

@@ -24,11 +24,8 @@ class Child(db.Model):
 
 
 class ChildSchema(ma.Schema):
-    first_name = fields.String(required=True)
-    last_name = fields.String(required=True)
-    
+  
     user=fields.Nested("UserSchema", exclude=["password", "is_admin", "is_teacher"])
-
     comments=fields.List(fields.Nested("CommentSchema", exclude=['child']))
     attendances=fields.List(fields.Nested("AttendanceSchema", only=['group']))
 
