@@ -39,6 +39,10 @@ class UserSchema(ma.Schema):
         fields.Nested("ChildSchema", only=["first_name", "last_name"])
     )
     contacts = fields.List(fields.Nested("ContactSchema"))
+    comments = fields.List(
+        fields.Nested("CommentSchema", exclude=["user"])
+    )
+
 
     class Meta:
         ordered = True

@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 from models.child import Child, ChildSchema
+from models.comment import Comment, CommentSchema
 from models.user import User
 from init import db
 from marshmallow.exceptions import ValidationError
@@ -146,6 +147,23 @@ def get_child_comments(id):
 
 
 # READ Comment single about child
+@children_bp.route("/<int:id>/comments/<int:id2>", methods=["GET"])
+@jwt_required()
+def get_comment(id, id2):
+
+    user_id = get_jwt_identity()
+    user_type = user_status(user_id)
+
+    stmt = db.select(Comment).where(Comment.child_id == id, Comment.id == id2 )
+    comment = db.session.scalar(stmt)
+    comment_dict = CommentSchema().dump(comment)
+
+    if user_type == "Admin" or user_type == "Teacher" or comment_dict["user_id"] == user_id:
+        return comment_dict
+    else:
+        raise ValidationError(
+            "You must are not authorised to access this resource", 403)
+
 
 # CREATE Comment about child
 

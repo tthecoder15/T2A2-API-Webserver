@@ -30,4 +30,4 @@ class CommentSchema(ma.Schema):
 
     class Meta:
         ordered = True
-        fields = ("child", "user", "date_created", "urgency", "message")
+        fields = ("child", "user_id", "date_created", "urgency", "message")
