@@ -65,7 +65,9 @@ def register_child():
         stmt = db.select(User).where(User.id == request.json["user_id"])
         user = db.session.scalar(stmt)
         if not user:
-            return {"Error": "No such user. Please check 'user_id' matches a registered user"}, 400
+            return {
+                "Error": "No such user. Please check 'user_id' matches a registered user"
+            }, 400
         new_child.user_id = request.json["user_id"]
 
     elif user_type == "Parent":
@@ -249,6 +251,7 @@ def delete_comment(id, id2):
     else:
         return {"Error": "You are not authorised to access this resource"}, 403
 
+
 # Attendances
 # READ child's attendances
 @children_bp.route("/<int:id>/attendances", methods=["GET"])
@@ -268,7 +271,7 @@ def get_child_attendances(id):
         or child_dict["user_id"] == user_id
     ):
         return child_dict
-   
+
     return {"Error": "You are not authorised to access this resource"}, 403
 
 
@@ -289,7 +292,7 @@ def get_attendance(id, id2):
         or attendance_dict["child"]["user_id"] == user_id
     ):
         return attendance_dict
-    
+
     return {"Error": "You are not authorised to access this resource"}, 403
 
 
@@ -310,22 +313,20 @@ def post_attendance(id):
     elif user_type == "Teacher":
         return {"Error": "You are not authorised to access this resource"}, 403
 
-    # attendance_info = AttendanceSchema(only=["group_id", "contact_id"], unknown="exclude").load(
-    #     request.json
-    # )
-    
-    # new_attendance = Attendance(
-    #     group_id=attendance_info["group_id"],
-    #     contact_id=attendance_info["contact_id"],
-    #     child_id=id
-    # )
+    # Check for same child attending same group in DB
+    stmt = db.select(Attendance).where(
+        Attendance.child_id == id, Attendance.group_id == request.json["group_id"]
+    )
+    user = db.session.scalar(stmt)
 
     new_attendance = Attendance(
         group_id=request.json["group_id"],
         contact_id=request.json["contact_id"],
-        child_id=id
+        child_id=id,
     )
 
+    if user:
+        return {"Error": "Child attendance is already registered for that group"}, 400
 
     db.session.add(new_attendance)
     db.session.commit()
@@ -338,11 +339,7 @@ def post_attendance(id):
 def update_attendance(id, id2):
     user_id = get_jwt_identity()
 
-    new_info = AttendanceSchema(
-        only=["group_id", "contact_id"],
-        unknown="exclude",
-    ).load(request.json)
-    if new_info == {}:
+    if "group_id" not in request.json and "contact_id" not in request.json:
         return {"Error": "Please provide at least one value to update"}, 400
 
     attendance = db.get_or_404(Attendance, id2)

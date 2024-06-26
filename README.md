@@ -54,6 +54,9 @@ The Trello board after five days of work. Again, I made some adjustments to the 
 ![Trello Board screenshot after day 6](docs/agile-7.png)
 The Trello board after six days of work. I added a new card to breakdown the task of finishing the API's endpoints.
 
+![Trello Board screenshot after day 7](docs/agile-8.png)
+The Trello board after seven days of work.
+
 ### References
 
 Brede Moe, N., Dingsøyr, T., Dyba, T. (2014) 'Agile Project Management', in Ruhe, G., Wohlin, C. (eds.) _Software Project Management in a Changing World_. Berlin: Springer-Verlag, pp. 277-300.

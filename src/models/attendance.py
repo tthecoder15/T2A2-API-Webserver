@@ -24,6 +24,7 @@ class AttendanceSchema(ma.Schema):
     group = fields.Nested("GroupSchema", only=["group_name", "day"])
     contact = fields.Nested("ContactSchema", exclude=["attendances"])
 
+
     class Meta:
         ordered = True
         fields = ("child", "group", "contact")
