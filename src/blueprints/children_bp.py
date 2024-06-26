@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Blueprint, request
 from models.child import Child, ChildSchema
 from models.comment import Comment, CommentSchema
@@ -33,7 +34,6 @@ def get_children():
 def get_child(id):
     child = db.get_or_404(Child, id)
     child_dict = ChildSchema().dump(child)
-    print(child_dict)
     user_id = get_jwt_identity()
     user_type = user_status(user_id)
     if user_type == "Admin" or child_dict["user_id"] == user_id:
@@ -47,7 +47,7 @@ def get_child(id):
 # CREATE Child
 @children_bp.route("/", methods=["POST"])
 @jwt_required()
-def register_movie():
+def register_child():
     user_id = get_jwt_identity()
     user_type = user_status(user_id)
 
@@ -81,8 +81,7 @@ def register_movie():
         Child.last_name == new_child.last_name,
         Child.user_id == new_child.user_id,
     )
-    print(stmt)
-    print(new_child.first_name)
+
     child = db.session.scalar(stmt)
     if child:
         raise ValidationError("This child is already registered to this user", 401)
@@ -129,6 +128,7 @@ def delete_child(id):
     else:
         raise ValidationError("You are not authorised to access this resource", 403)
 
+
 # READ Comments about child
 @children_bp.route("/<int:id>/comments", methods=["GET"])
 @jwt_required()
@@ -137,13 +137,20 @@ def get_child_comments(id):
     user_type = user_status(user_id)
 
     child = db.get_or_404(Child, id)
-    child_dict = ChildSchema(only=["user_id", "first_name", "last_name", "comments"]).dump(child)
+    child_dict = ChildSchema(
+        only=["user_id", "first_name", "last_name", "comments"]
+    ).dump(child)
 
-    if user_type == "Admin" or user_type == "Teacher" or child_dict["user_id"] == user_id:
+    if (
+        user_type == "Admin"
+        or user_type == "Teacher"
+        or child_dict["user_id"] == user_id
+    ):
         return child_dict
     else:
         raise ValidationError(
-            "You must are not authorised to access this resource", 403)
+            "You must are not authorised to access this resource", 403
+        )
 
 
 # READ Comment single about child
@@ -154,18 +161,53 @@ def get_comment(id, id2):
     user_id = get_jwt_identity()
     user_type = user_status(user_id)
 
-    stmt = db.select(Comment).where(Comment.child_id == id, Comment.id == id2 )
+    stmt = db.select(Comment).where(Comment.child_id == id, Comment.id == id2)
     comment = db.session.scalar(stmt)
     comment_dict = CommentSchema().dump(comment)
 
-    if user_type == "Admin" or user_type == "Teacher" or comment_dict["user_id"] == user_id:
+    if (
+        user_type == "Admin"
+        or user_type == "Teacher"
+        or comment_dict["user_id"] == user_id
+    ):
         return comment_dict
     else:
         raise ValidationError(
-            "You must are not authorised to access this resource", 403)
+            "You must are not authorised to access this resource", 403
+        )
 
 
 # CREATE Comment about child
+@children_bp.route("/<int:id>", methods=["POST"])
+@jwt_required()
+def post_comment(id):
+    user_id = get_jwt_identity()
+    user_type = user_status(user_id)
+
+    if user_type == "Parent":
+        child = db.get_or_404(Child, id)
+        child_dict = ChildSchema().dump(child)
+
+        if child_dict["user_id"] != user_id:
+            raise ValidationError(
+                "You must are not authorised to access this resource", 403
+            )
+
+    comment_info = CommentSchema(only=["message", "urgency"], unknown="exclude").load(
+        request.json
+    )
+    new_comment = Comment(
+        message=comment_info["message"],
+        urgency=comment_info["urgency"],
+        user_id=user_id,
+        child_id=id,
+        date_created=datetime.now().date(),
+    )
+
+    db.session.add(new_comment)
+    db.session.commit()
+    return {"Success": CommentSchema().dump(new_comment)}, 201
+
 
 # UPDATE Comment about child
 
