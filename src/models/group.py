@@ -25,7 +25,6 @@ class GroupSchema(ma.Schema):
     day = fields.String()
 
     teacher = fields.Nested("TeacherSchema", exclude=["groups"])
-
     attendances=fields.List(fields.Nested("AttendanceSchema", exclude=['group']))
 
     class Meta:

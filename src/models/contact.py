@@ -28,7 +28,10 @@ class ContactSchema(ma.Schema):
     ph_number = fields.String(validate=Length(min=10, max=10))
 
     user = fields.Nested("UserSchema", exclude=["password", "is_admin", "is_teacher"])
+    
+    attendances=fields.List(fields.Nested("AttendanceSchema", exclude=['contact']))
 
     class Meta:
         ordered = True
-        fields = ("emergency_contact", "first_name", "ph_number", "email")
+        fields = ("first_name", "emergency_contact", "ph_number", "email", "attendances")
+        

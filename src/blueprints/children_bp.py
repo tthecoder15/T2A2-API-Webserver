@@ -66,9 +66,7 @@ def register_child():
         stmt = db.select(User).where(User.id == request.json["user_id"])
         user = db.session.scalar(stmt)
         if not user:
-            raise ValidationError(
-                "No such user. Please check user_id matches a registered user"
-            )
+            return {"Error": "No such user. Please check 'user_id' matches a registered user"}, 400
         new_child.user_id = request.json["user_id"]
 
     elif user_type == "Parent":
@@ -83,7 +81,7 @@ def register_child():
 
     child = db.session.scalar(stmt)
     if child:
-        raise ValidationError("This child is already registered to this user", 401)
+        return {"Error": "This child is already registered to this user"}, 400
 
     db.session.add(new_child)
     db.session.commit()

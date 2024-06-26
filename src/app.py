@@ -4,6 +4,7 @@ from blueprints.users_bp import users_bp
 from blueprints.children_bp import children_bp
 from blueprints.teachers_bp import teachers_bp
 from blueprints.groups_bp import groups_bp
+from blueprints.contacts_bp import contacts_bp
 
 from marshmallow.exceptions import ValidationError
 from sqlalchemy.exc import IntegrityError
@@ -13,6 +14,7 @@ app.register_blueprint(users_bp)
 app.register_blueprint(children_bp)
 app.register_blueprint(teachers_bp)
 app.register_blueprint(groups_bp)
+app.register_blueprint(contacts_bp)
 
 
 @app.route("/")

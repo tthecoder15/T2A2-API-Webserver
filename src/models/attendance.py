@@ -23,7 +23,7 @@ class AttendanceSchema(ma.Schema):
     message = fields.String(required=True)
     date_created = fields.String(required=True)
 
-    child = fields.Nested("ChildSchema")
+    child = fields.Nested("ChildSchema", only=["first_name", "last_name"])
     group = fields.Nested("GroupSchema", only=["group_name", "day"])
     contact = fields.Nested("ContactSchema")
 
