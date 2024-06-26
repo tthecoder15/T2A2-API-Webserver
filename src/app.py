@@ -3,8 +3,7 @@ from blueprints.cli_bp import cli_commands
 from blueprints.users_bp import users_bp
 from blueprints.children_bp import children_bp
 from blueprints.teachers_bp import teachers_bp
-
-# from src.blueprints.attendances_bp import cli_commands
+from blueprints.groups_bp import groups_bp
 
 from marshmallow.exceptions import ValidationError
 from sqlalchemy.exc import IntegrityError
@@ -13,8 +12,7 @@ app.register_blueprint(cli_commands)
 app.register_blueprint(users_bp)
 app.register_blueprint(children_bp)
 app.register_blueprint(teachers_bp)
-
-# app.register_blueprint(actors_bp)
+app.register_blueprint(groups_bp)
 
 
 @app.route("/")
@@ -26,7 +24,7 @@ def hello():
 @app.errorhandler(404)
 def not_found(err):
     print(err)
-    return {"Error": "No resource found"}
+    return {"Error": "No resource found"}, 404
 
 
 @app.errorhandler(ValidationError)
@@ -48,7 +46,7 @@ def missing_key(err):
 def incorrect_body(err):
     return {
         "Error": f"{str(err).capitalize()}, please check your request body's formatting"
-    }
+    }, 400
 
 
 print(app.url_map)

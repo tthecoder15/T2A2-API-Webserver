@@ -10,7 +10,7 @@ class Attendance(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
     child_id: Mapped[int] = mapped_column(ForeignKey("children.id"))
-    children: Mapped["Child"] = relationship(back_populates="attendances")
+    child: Mapped["Child"] = relationship(back_populates="attendances")
 
     group_id: Mapped[int] = mapped_column(ForeignKey("groups.id"))
     group: Mapped["Group"] = relationship(back_populates="attendances")

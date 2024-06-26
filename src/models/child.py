@@ -19,7 +19,7 @@ class Child(db.Model):
         back_populates="children", cascade="all, delete"
     )
     attendances: Mapped[List["Attendance"]] = relationship(
-        back_populates="children", cascade="all, delete"
+        back_populates="child", cascade="all, delete"
     )
 
 
