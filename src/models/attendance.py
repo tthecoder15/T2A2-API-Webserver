@@ -20,12 +20,9 @@ class Attendance(db.Model):
 
 
 class AttendanceSchema(ma.Schema):
-    message = fields.String(required=True)
-    date_created = fields.String(required=True)
-
-    child = fields.Nested("ChildSchema", only=["first_name", "last_name"])
+    child = fields.Nested("ChildSchema", only=["user_id", "first_name", "last_name"], exclude=["attendances"])
     group = fields.Nested("GroupSchema", only=["group_name", "day"])
-    contact = fields.Nested("ContactSchema")
+    contact = fields.Nested("ContactSchema", exclude=["attendances"])
 
     class Meta:
         ordered = True

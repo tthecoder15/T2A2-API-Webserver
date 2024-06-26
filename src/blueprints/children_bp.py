@@ -2,9 +2,10 @@ from datetime import datetime
 from flask import Blueprint, request
 from models.child import Child, ChildSchema
 from models.comment import Comment, CommentSchema
+from models.attendance import Attendance, AttendanceSchema
 from models.user import User
 from init import db
-from marshmallow.exceptions import ValidationError
+
 from auth import user_status
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -39,9 +40,7 @@ def get_child(id):
     if user_type == "Admin" or child_dict["user_id"] == user_id:
         return child_dict
     else:
-        raise ValidationError(
-            "You must are not authorised to access this resource", 403
-        )
+        return {"Error": "You are not authorised to access this resource"}, 403
 
 
 # CREATE Child
@@ -114,7 +113,7 @@ def update_child(id):
         return ChildSchema().dump(child), 200
 
     else:
-        raise ValidationError("You are not authorised to access this resource", 401)
+        return {"Error": "You are not authorised to access this resource"}, 403
 
 
 # DELETE Child
@@ -130,7 +129,7 @@ def delete_child(id):
         db.session.commit()
         return {"Success": "Child registration deleted"}, 200
     else:
-        raise ValidationError("You are not authorised to access this resource", 403)
+        return {"Error": "You are not authorised to access this resource"}, 403
 
 
 # READ Comments about child
@@ -152,9 +151,7 @@ def get_child_comments(id):
     ):
         return child_dict
     else:
-        raise ValidationError(
-            "You must are not authorised to access this resource", 403
-        )
+        return {"Error": "You are not authorised to access this resource"}, 403
 
 
 # READ Comment single about child
@@ -175,13 +172,11 @@ def get_comment(id, id2):
     ):
         return comment_dict
     else:
-        raise ValidationError(
-            "You must are not authorised to access this resource", 403
-        )
+        return {"Error": "You are not authorised to access this resource"}, 403
 
 
 # CREATE Comment about child
-@children_bp.route("/<int:id>", methods=["POST"])
+@children_bp.route("/<int:id>/comments", methods=["POST"])
 @jwt_required()
 def post_comment(id):
     user_id = get_jwt_identity()
@@ -192,9 +187,7 @@ def post_comment(id):
         child_dict = ChildSchema().dump(child)
 
         if child_dict["user_id"] != user_id:
-            raise ValidationError(
-                "You must are not authorised to access this resource", 403
-            )
+            return {"Error": "You are not authorised to access this resource"}, 403
 
     comment_info = CommentSchema(only=["message", "urgency"], unknown="exclude").load(
         request.json
@@ -236,9 +229,7 @@ def update_comment(id, id2):
         db.session.commit()
         return CommentSchema().dump(comment), 200
     else:
-        raise ValidationError(
-            "You must are not authorised to access this resource", 403
-        )
+        return {"Error": "You are not authorised to access this resource"}, 403
 
 
 # DELETE Comment about child
@@ -256,6 +247,129 @@ def delete_comment(id, id2):
         db.session.commit()
         return {"Success": "Comment deleted"}, 200
     else:
-        raise ValidationError(
-            "You must are not authorised to access this resource", 403
-        )
+        return {"Error": "You are not authorised to access this resource"}, 403
+
+# Attendances
+# READ child's attendances
+@children_bp.route("/<int:id>/attendances", methods=["GET"])
+@jwt_required()
+def get_child_attendances(id):
+    user_id = get_jwt_identity()
+    user_type = user_status(user_id)
+
+    child = db.get_or_404(Child, id)
+    child_dict = ChildSchema(
+        only=["user_id", "first_name", "last_name", "attendances"]
+    ).dump(child)
+
+    if (
+        user_type == "Admin"
+        or user_type == "Teacher"
+        or child_dict["user_id"] == user_id
+    ):
+        return child_dict
+   
+    return {"Error": "You are not authorised to access this resource"}, 403
+
+
+# READ child's single attendance
+@children_bp.route("/<int:id>/attendances/<int:id2>", methods=["GET"])
+@jwt_required()
+def get_attendance(id, id2):
+
+    user_id = get_jwt_identity()
+    user_type = user_status(user_id)
+
+    attendance = db.get_or_404(Attendance, id2)
+    attendance_dict = AttendanceSchema().dump(attendance)
+
+    if (
+        user_type == "Admin"
+        or user_type == "Teacher"
+        or attendance_dict["child"]["user_id"] == user_id
+    ):
+        return attendance_dict
+    
+    return {"Error": "You are not authorised to access this resource"}, 403
+
+
+# CREATE child's attendance
+@children_bp.route("/<int:id>/attendances", methods=["POST"])
+@jwt_required()
+def post_attendance(id):
+    user_id = get_jwt_identity()
+    user_type = user_status(user_id)
+
+    if user_type == "Parent":
+        child = db.get_or_404(Child, id)
+        child_dict = ChildSchema().dump(child)
+
+        if child_dict["user_id"] != user_id:
+            return {"Error": "You are not authorised to access this resource"}, 403
+
+    elif user_type == "Teacher":
+        return {"Error": "You are not authorised to access this resource"}, 403
+
+    # attendance_info = AttendanceSchema(only=["group_id", "contact_id"], unknown="exclude").load(
+    #     request.json
+    # )
+    
+    # new_attendance = Attendance(
+    #     group_id=attendance_info["group_id"],
+    #     contact_id=attendance_info["contact_id"],
+    #     child_id=id
+    # )
+
+    new_attendance = Attendance(
+        group_id=request.json["group_id"],
+        contact_id=request.json["contact_id"],
+        child_id=id
+    )
+
+
+    db.session.add(new_attendance)
+    db.session.commit()
+    return {"Success": AttendanceSchema().dump(new_attendance)}, 201
+
+
+# UPDATE child's attendance
+@children_bp.route("/<int:id>/attendances/<int:id2>", methods=["PATCH"])
+@jwt_required()
+def update_attendance(id, id2):
+    user_id = get_jwt_identity()
+
+    new_info = AttendanceSchema(
+        only=["group_id", "contact_id"],
+        unknown="exclude",
+    ).load(request.json)
+    if new_info == {}:
+        return {"Error": "Please provide at least one value to update"}, 400
+
+    attendance = db.get_or_404(Attendance, id2)
+    attendance_dict = AttendanceSchema().dump(attendance)
+
+    if attendance_dict["child"]["user_id"] == user_id:
+        attendance.group_id = request.json.get("group_id", attendance.group_id)
+        attendance.contact_id = request.json.get("contact_id", attendance.contact_id)
+        db.session.commit()
+        return AttendanceSchema().dump(attendance), 200
+    else:
+        return {"Error": "You are not authorised to access this resource"}, 403
+
+
+# DELETE child's Attendance
+@children_bp.route("/<int:id>/attendances/<int:id2>", methods=["DELETE"])
+@jwt_required()
+def delete_attendance(id, id2):
+
+    user_id = get_jwt_identity()
+    user_type = user_status(user_id)
+
+    attendance = db.get_or_404(Attendance, id2)
+    attendance_dict = AttendanceSchema().dump(attendance)
+    if user_type == "Admin" or attendance_dict["child"]["user_id"] == user_id:
+        db.session.delete(attendance)
+        db.session.commit()
+        return {"Success": "Attendance deleted"}, 200
+    else:
+        return {"Error": "You are not authorised to access this resource"}, 403
