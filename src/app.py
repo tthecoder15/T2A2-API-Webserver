@@ -39,7 +39,7 @@ def integrity_error(err):
 
 @app.errorhandler(KeyError)
 def missing_key(err):
-    return {"Error": f"Missing field: {str(err)}"}
+    return {"Error": f"Missing field: {str(err)}"}, 403
 
 
 @app.errorhandler(TypeError)

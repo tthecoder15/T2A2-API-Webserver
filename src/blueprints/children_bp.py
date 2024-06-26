@@ -161,14 +161,13 @@ def get_comment(id, id2):
     user_id = get_jwt_identity()
     user_type = user_status(user_id)
 
-    stmt = db.select(Comment).where(Comment.child_id == id, Comment.id == id2)
-    comment = db.session.scalar(stmt)
+    comment = db.get_or_404(Comment, id2)
     comment_dict = CommentSchema().dump(comment)
 
     if (
         user_type == "Admin"
         or user_type == "Teacher"
-        or comment_dict["user_id"] == user_id
+        or comment_dict["user"]["id"] == user_id
     ):
         return comment_dict
     else:
@@ -210,5 +209,42 @@ def post_comment(id):
 
 
 # UPDATE Comment about child
+@children_bp.route("/<int:id>/comments/<int:id2>", methods=["PATCH"])
+@jwt_required()
+def update_comment(id, id2):
+    user_id = get_jwt_identity()
+
+    comment = db.get_or_404(Comment, id2)
+    comment_dict = CommentSchema().dump(comment)
+
+    if comment_dict["user"]["id"] == user_id:
+        comment.message = request.json.get("message", comment.message)
+        comment.urgency = request.json.get("urgency", comment.urgency)
+        comment.comment_edited = True
+        comment.date_edited = datetime.now().date()
+        db.session.commit()
+        return CommentSchema().dump(comment), 200
+    else:
+        raise ValidationError(
+            "You must are not authorised to access this resource", 403
+        )
+
 
 # DELETE Comment about child
+@children_bp.route("/<int:id>/comments/<int:id2>", methods=["DELETE"])
+@jwt_required()
+def delete_comment(id, id2):
+
+    user_id = get_jwt_identity()
+    user_type = user_status(user_id)
+
+    comment = db.get_or_404(Comment, id2)
+    comment_dict = CommentSchema().dump(comment)
+    if user_type == "Admin" or comment_dict["user"]["id"] == user_id:
+        db.session.delete(comment)
+        db.session.commit()
+        return {"Success": "Comment deleted"}, 200
+    else:
+        raise ValidationError(
+            "You must are not authorised to access this resource", 403
+        )
