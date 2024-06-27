@@ -2,13 +2,14 @@ from init import db
 from models.user import User, UserSchema
 
 
+
 def admin_check(user_id):
     stmt = db.select(User).where(User.id == user_id, User.is_admin)
     user = db.session.scalar(stmt)
     if user:
         return True
     else:
-        return{"Error": "You are not authorised to access this resource"}, 403 
+        return False 
         
 
 def user_status(user_id):

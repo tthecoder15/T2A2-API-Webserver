@@ -15,19 +15,30 @@ users_bp = Blueprint("user", __name__, url_prefix="/users")
 @users_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_users():
-    admin_check(get_jwt_identity())
-    stmt = db.select(User)
-    users = db.session.scalars(stmt).all()
-    return UserSchema(many=True, exclude=["password"]).dump(users)
+    user_id = get_jwt_identity()
+    if admin_check(user_id):
+        stmt = db.select(User)
+        users = db.session.scalars(stmt).all()
+        return UserSchema(many=True, exclude=["password"]).dump(users)
+    else:
+        return {"Error": "You are not authorised to access this resource"}, 403
 
 
 # READ One User
 @users_bp.route("/<int:id>", methods=["GET"])
 @jwt_required()
 def get_user(id):
-    admin_check(get_jwt_identity())
-    user = db.get_or_404(User, id)
-    return UserSchema(exclude=["password"]).dump(user)
+    user_id = get_jwt_identity()
+    user_type = user_status(user_id)
+    if user_type == "Admin":
+        user = db.get_or_404(User, id)
+        return UserSchema(exclude=["password"]).dump(user)
+    if user_type == "Parent" or user_type == "Teacher":
+        user = db.get_or_404(User, id)
+        if user.id == user_id:
+            return UserSchema(exclude=["password", "is_admin", "is_teacher"]).dump(user)
+        else:
+            return {"Error": "You are not authorised to access this resource"}, 403
 
 
 # LOGIN
@@ -48,57 +59,59 @@ def login():
 
 
 # Create User, admin auth
-@users_bp.route("/", methods=["POST"])
+@users_bp.route("/admin", methods=["POST"])
 @jwt_required()
-def signup_admin():
-    admin_check(get_jwt_identity())
+def create_user_admin():
+    user_id = get_jwt_identity()
+    user_type = user_status(user_id)
+    
+    if user_type == "Admin":
+        # Check if email in db
+        stmt = db.select(User).where(User.email == request.json["email"])
+        user = db.session.scalar(stmt)
 
+        if user:
+            return{"Error": "Email already registered. Please provide a unique email address"}, 400
+
+        input_info = UserSchema(
+            only=["email", "first_name", "password", "is_admin", "is_teacher"],
+            unknown="exclude",
+        ).load(request.json)
+
+        
+        new_user = User(
+            email=input_info["email"],
+            password=bcrypt.generate_password_hash(input_info["password"]).decode("utf-8"),
+            first_name=input_info["first_name"].capitalize(),
+            is_admin=str(input_info["is_admin"]).capitalize() in ["True"],
+            is_teacher=str(input_info["is_teacher"]).capitalize() in ["True"],
+        )
+
+        db.session.add(new_user)
+        db.session.commit()
+        
+        return {
+            "Success": UserSchema(
+                only=["email", "first_name", "is_admin", "is_teacher"]
+            ).dump(new_user)
+        }, 201
+    else:
+        return {"Error": "You are not authorised to access this resource"}, 403
+    
+# Create User, not a user
+@users_bp.route("/", methods=["POST"])
+def create_user():
     # Check if email in db
     stmt = db.select(User).where(User.email == request.json["email"])
     user = db.session.scalar(stmt)
     if user:
-        return{"Error": "Email already registered. Please provide a unique email address"}, 400
+        return{"Error": "This email is already registered to a user. Please provide a unique email address"}, 400
 
-    input_info = UserSchema(
-        only=["email", "first_name", "password", "is_admin", "is_teacher"],
-        unknown="exclude",
-    ).load(request.json)
-
-    new_user = User(
-        email=input_info["email"],
-        password=bcrypt.generate_password_hash(input_info["password"]).decode("utf-8"),
-        first_name=input_info["first_name"].capitalize(),
-        is_admin=input_info["is_admin"],
-        is_teacher=input_info["is_teacher"],
-    )
-
-    db.session.add(new_user)
-    db.session.commit()
-    return {
-        "Success": UserSchema(
-            only=["email", "first_name", "is_admin", "is_teacher"]
-        ).dump(new_user)
-    }, 201
-
-
-# CREATE User, non-authorised user register
-@users_bp.route("/signup", methods=["POST"])
-def user_signup():
-    # Check if email in db
     input_info = UserSchema(
         only=["email", "first_name", "password"],
         unknown="exclude",
     ).load(request.json)
 
-    if input_info == {}:
-        return {"Error": "Please 'email', 'first_name' and 'password' values"}, 400
-    
-    stmt = db.select(User).where(User.email == request.json["email"])
-    user = db.session.scalar(stmt)
-    
-    if user:
-        return {"Error": "Email already registered. Please provide a unique email address"}, 400
-        
     new_user = User(
         email=input_info["email"],
         password=bcrypt.generate_password_hash(input_info["password"]).decode("utf-8"),
@@ -107,8 +120,12 @@ def user_signup():
 
     db.session.add(new_user)
     db.session.commit()
-    return {"Success": UserSchema(only=["email", "first_name"]).dump(new_user)}, 201
-
+    
+    return {
+        "Success": UserSchema(
+            only=["email", "first_name"]
+        ).dump(new_user)
+    }, 201
 
 # UPDATE User
 @users_bp.route("/<int:id>", methods=["PATCH"])
@@ -116,13 +133,19 @@ def user_signup():
 def update_user(id):
     user_id = get_jwt_identity()
     user_type = user_status(user_id)
-    user = db.get_or_404(User, id)
 
+    if "email" in request.json:
+        stmt = db.select(User).where(User.email == request.json["email"])
+        user = db.session.scalar(stmt)
+        if user:
+            return{"Error": "This email is already registered to a user. Please provide a unique email address"}, 400
+    
+    user = db.get_or_404(User, id)
     new_info = UserSchema(
         only=["email", "first_name", "is_admin", "is_teacher", "password"],
         unknown="exclude",
     ).load(request.json)
-    print("new_info")
+
     if new_info == {}:
         return {"Error": "Please provide at least one value to update"}, 400
 
@@ -136,8 +159,16 @@ def update_user(id):
             user.is_teacher = str(
                 request.json.get("is_teacher", user.is_teacher)
             ).capitalize() in ["True"]
-        db.session.commit()
-        return UserSchema().dump(user), 200
+        db.session.commit()      
+
+        if "password" in request.json:
+            new_info.update({"password": "Password successfully updated"})
+        
+        if user_type == "Admin":
+            return {"Updated fields": new_info}, 200
+        
+        elif user.id == user_id:
+            return {"Updated fields": new_info}, 200
     else:
         return {"Error": "You are not authorised to access this resource"}, 403
 

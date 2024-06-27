@@ -51,7 +51,7 @@ def register_child():
     user_type = user_status(user_id)
 
     if user_type == "Teacher":
-        raise ValidationError("This feature is for parent users", 403)
+        return {"Error": "You are not authorised to access this resource"}, 403
 
     child_info = ChildSchema(only=["first_name", "last_name"], unknown="exclude").load(
         request.json
