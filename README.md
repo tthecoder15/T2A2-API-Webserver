@@ -57,6 +57,9 @@ The Trello board after six days of work. I added a new card to breakdown the tas
 ![Trello Board screenshot after day 7](docs/agile-8.png)
 The Trello board after seven days of work.
 
+![Trello Board screenshot after day 8](docs/agile-9.png)
+The Trello board after eight days of work.
+
 ### References
 
 Brede Moe, N., Dingsøyr, T., Dyba, T. (2014) 'Agile Project Management', in Ruhe, G., Wohlin, C. (eds.) _Software Project Management in a Changing World_. Berlin: Springer-Verlag, pp. 277-300.
