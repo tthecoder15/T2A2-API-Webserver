@@ -24,10 +24,12 @@ def get_children():
         stmt = db.select(Child)
         children = db.session.scalars(stmt).all()
         return ChildSchema(many=True).dump(children)
-    else:
+    if user_type == "Parent":
         stmt = db.select(Child).where(Child.user_id == user_id)
         registered_children = db.session.scalars(stmt)
         return ChildSchema(many=True).dump(registered_children)
+    else:
+        return {"Error": "You are not authorised to access this resource"}, 403
 
 
 @children_bp.route("/<int:id>", methods=["GET"])
@@ -101,6 +103,11 @@ def update_child(id):
     user_type = user_status(user_id)
     child = db.get_or_404(Child, id)
 
+    if "first_name" in request.json:
+        request.json["first_name"] = request.json["first_name"].capitalize()
+    if "last_name" in request.json:
+        request.json["last_name"] = request.json["last_name"].capitalize()
+
     new_info = ChildSchema(
         only=["first_name", "last_name"],
         unknown="exclude",
@@ -112,7 +119,7 @@ def update_child(id):
         child.first_name = request.json.get("first_name", child.first_name)
         child.last_name = request.json.get("last_name", child.last_name)
         db.session.commit()
-        return ChildSchema().dump(child), 200
+        return {"Updated fields": new_info}, 200
 
     else:
         return {"Error": "You are not authorised to access this resource"}, 403
@@ -212,6 +219,9 @@ def post_comment(id):
 @jwt_required()
 def update_comment(id, id2):
     user_id = get_jwt_identity()
+
+    if "urgency" in request.json:
+        request.json["urgency"] = request.json["urgency"].lower()
 
     new_info = CommentSchema(
         only=["message", "urgency"],

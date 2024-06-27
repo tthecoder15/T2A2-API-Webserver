@@ -1,10 +1,6 @@
-from datetime import datetime
 from flask import Blueprint, request
 from models.group import Group, GroupSchema
-from models.comment import Comment, CommentSchema
-from models.user import User
 from init import db
-from marshmallow.exceptions import ValidationError
 from auth import admin_check
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -23,9 +19,7 @@ def get_groups():
         groups = db.session.scalars(stmt).all()
         return GroupSchema(many=True).dump(groups)
     else:
-        stmt = db.select(Group).where(Group.user_id == user_id)
-        registered_groups = db.session.scalars(stmt)
-        return GroupSchema(many=True).dump(registered_groups)
+        return{"Error": "You are not authorised to access this resource"}, 403 
 
 
 # READ Single Group
@@ -82,6 +76,11 @@ def register_group():
 def update_group(id):
     user_id = get_jwt_identity()
 
+    if "group_name" in request.json:
+        request.json["group_name"] = request.json["group_name"].capitalize()
+    if "day" in request.json:
+        request.json["day"] = request.json["day"].capitalize()
+
     new_info = GroupSchema(
         only=["group_name", "day"],
         unknown="exclude",
@@ -96,10 +95,10 @@ def update_group(id):
     if admin_check(user_id):
         group = db.get_or_404(Group, id)
         group.group_name = request.json.get("group_name", group.group_name).capitalize()
-        group.day = request.json.get("day", group.day).capitalize()
+        group.day = request.json.get("day", group.day)
         group.teacher_id = int(request.json.get(("teacher_id"), group.teacher_id))
         db.session.commit()
-        return GroupSchema().dump(group), 200
+        return {"Updated fields": new_info}, 200
     else:
         return {"Error": "You are not authorised to access this resource"}, 403
 

@@ -19,9 +19,7 @@ def get_contacts():
         contacts = db.session.scalars(stmt).all()
         return ContactSchema(many=True).dump(contacts)
     else:
-        stmt = db.select(Contact).where(Contact.user_id == user_id)
-        registered_contacts = db.session.scalars(stmt)
-        return ContactSchema(many=True).dump(registered_contacts)
+        return{"Error": "You are not authorised to access this resource"}, 403 
 
 
 @contacts_bp.route("/<int:id>", methods=["GET"])
@@ -103,7 +101,12 @@ def update_contact(id):
         # Sanitising ph_number to have 0 at the start
         if "ph_number" in request.json and str(request.json["ph_number"])[0] != "0":
             request.json["ph_number"] = "0" + str(request.json["ph_number"])
-
+        
+        if "first_name" in request.json:
+            request.json["first_name"] = request.json["first_name"].capitalize()
+        if "emergency_contact" in request.json:
+            request.json["emergency_contact"] = request.json["emergenct_contact"].capitalize()
+       
         new_info = ContactSchema(
             only=["first_name", "emergency_contact", "email", "ph_number"],
             unknown="exclude",
@@ -115,14 +118,14 @@ def update_contact(id):
 
         contact.first_name = request.json.get(
             "first_name", contact.first_name
-        ).capitalize()
+        )
         contact.emergency_contact = str(
             request.json.get("emergency_contact", contact.emergency_contact)
-        ).capitalize() in ["True"]
+        ) in ["True"]
         contact.email = request.json.get("email", contact.email)
         contact.ph_number = request.json.get("ph_number", contact.ph_number)
         db.session.commit()
-        return ContactSchema().dump(contact), 200
+        return {"Updated fields": new_info}, 200
     else:
         return {"Error": "You are not authorised to access this resource"}, 403
 
