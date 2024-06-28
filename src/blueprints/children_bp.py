@@ -13,7 +13,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 children_bp = Blueprint("child", __name__, url_prefix="/children")
 
 
-# READ Child
+# READ Children
 @children_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_children():
@@ -31,7 +31,7 @@ def get_children():
     else:
         return {"Error": "You are not authorised to access this resource"}, 403
 
-
+# READ Child
 @children_bp.route("/<int:id>", methods=["GET"])
 @jwt_required()
 def get_child(id):
@@ -52,7 +52,7 @@ def register_child():
     user_id = get_jwt_identity()
     user_type = user_status(user_id)
 
-    if user_type == "Teacher":
+    if user_type != "Admin" and user_type != "Parent":
         return {"Error": "You are not authorised to access this resource"}, 403
 
     child_info = ChildSchema(only=["first_name", "last_name"], unknown="exclude").load(

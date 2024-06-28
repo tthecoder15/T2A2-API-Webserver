@@ -1,14 +1,14 @@
 from typing import List
-from datetime import date
 from init import db, ma
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Text, Date, ForeignKey, String
+from sqlalchemy import Text, ForeignKey, String
 from marshmallow import fields
+from marshmallow.validate import And, Regexp, Length, OneOf
 
 
 class Group(db.Model):
     __tablename__ = "groups"
-    id: Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     group_name: Mapped[str] = mapped_column(Text)
     day: Mapped[str] = mapped_column(String)
 
@@ -21,12 +21,30 @@ class Group(db.Model):
 
 
 class GroupSchema(ma.Schema):
-    group_name = fields.String()
-    day = fields.String()
+    group_name = fields.String(validate=And(
+            Regexp(
+                "^[a-zA-Z'-]+(?: [a-zA-Z'-]+)*$",
+                error="Names must not contain numbers or special characters besides hyphens, apostrophes and spaces",
+            ),
+            Length(min=3, error="Group names must be at least 3 characters")))
+    
+    day = fields.String(
+        validate=OneOf(
+            [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+            ]
+        )
+    )
 
     teacher = fields.Nested("TeacherSchema", exclude=["groups"])
-    attendances=fields.List(fields.Nested("AttendanceSchema", exclude=['group']))
+    attendances = fields.List(fields.Nested("AttendanceSchema", exclude=["group"]))
 
     class Meta:
-        ordered=True
+        ordered = True
         fields = ("id", "day", "group_name", "teacher")

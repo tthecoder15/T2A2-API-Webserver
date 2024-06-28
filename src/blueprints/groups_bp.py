@@ -42,12 +42,14 @@ def get_group(id):
 def register_group():
     user_id = get_jwt_identity()
 
+    request.json["day"] = request.json["day"].capitalize()
+
     group_info = GroupSchema(only=["group_name", "day"], unknown="exclude").load(
         request.json
     )
     new_group = Group(
         group_name=group_info["group_name"].capitalize(),
-        day=group_info["day"].capitalize(),
+        day=group_info["day"],
         teacher_id=int(request.json["teacher_id"]),
     )
 

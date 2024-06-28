@@ -31,6 +31,8 @@ def not_found(err):
 
 @app.errorhandler(ValidationError)
 def invalid_request(err):
+    if "_schema" in vars(err)["messages"]:
+        vars(err)["messages"]["_schema"] = "Invalid input. Please check your request body's formatting"
     return {"Error": vars(err)["messages"]}, 400
 
 
@@ -47,7 +49,7 @@ def missing_key(err):
 @app.errorhandler(TypeError)
 def incorrect_body(err):
     return {
-        "Error": f"{str(err).capitalize()}, please check your request body's formatting"
+        "Error": f"{str(err).capitalize()}. Please check your request body's formatting"
     }, 400
 
 

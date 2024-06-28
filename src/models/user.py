@@ -1,9 +1,9 @@
 from typing import Optional, List
 from init import db, ma
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Text, String, Boolean
+from sqlalchemy import String, Boolean
 from marshmallow import fields
-from marshmallow.validate import Length, OneOf
+from marshmallow.validate import Length, And, Regexp
 
 
 class User(db.Model):
@@ -30,7 +30,15 @@ class User(db.Model):
 
 class UserSchema(ma.Schema):
     email = fields.Email()
-    first_name = fields.String()
+    first_name = fields.String(
+        validate=And(
+            Regexp(
+                "^[a-zA-Z'-]+(?: [a-zA-Z'-]+)*$",
+                error="Names must not contain numbers or special characters besides hyphens, apostrophes and spaces",
+            ),
+            Length(min=2, error="First name must be at least 2 characters"),
+        )
+    )
     password = fields.String(validate=Length(min=8))
     is_admin = fields.Boolean()
     is_teacher = fields.Boolean()
@@ -39,10 +47,7 @@ class UserSchema(ma.Schema):
         fields.Nested("ChildSchema", only=["first_name", "last_name"])
     )
     contacts = fields.List(fields.Nested("ContactSchema"))
-    comments = fields.List(
-        fields.Nested("CommentSchema", exclude=["user"])
-    )
-
+    comments = fields.List(fields.Nested("CommentSchema", exclude=["user"]))
 
     class Meta:
         ordered = True

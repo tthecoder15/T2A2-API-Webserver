@@ -176,6 +176,13 @@ def update_user(id):
         if "password" in request.json:
             new_info.update({"password": "Password successfully updated"})
 
+        # Removes "is_admin" or "is_teacher" from list of updates if user isn't admin
+        if user_type != "Admin":
+            if "is_admin" in new_info:
+                new_info.pop("is_admin")
+            if "is_teacher" in new_info:
+                new_info.pop("is_teacher")
+
         return {"Updated fields": new_info}, 200
 
     else:

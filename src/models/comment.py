@@ -3,7 +3,7 @@ from init import db, ma
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Text, String, ForeignKey, Date, Boolean
 from marshmallow import fields
-from marshmallow.validate import OneOf
+from marshmallow.validate import OneOf, Length
 
 
 class Comment(db.Model):
@@ -24,7 +24,7 @@ class Comment(db.Model):
 
 
 class CommentSchema(ma.Schema):
-    message = fields.String()
+    message = fields.String(validate= Length(min=3, error = "Comments need to be at least 3 characters long"))
     date_created = fields.String()
     urgency = fields.String(validate= OneOf(["urgent", "positive", "neutral"]))
     

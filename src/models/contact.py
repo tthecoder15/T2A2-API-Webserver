@@ -1,10 +1,9 @@
-from datetime import date
 from init import db, ma
 from typing import List
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Text, String, ForeignKey, Date
+from sqlalchemy import String, ForeignKey
 from marshmallow import fields
-from marshmallow.validate import Length
+from marshmallow.validate import Length, And, Regexp
 
 
 class Contact(db.Model):
@@ -25,13 +24,26 @@ class Contact(db.Model):
 
 class ContactSchema(ma.Schema):
     email = fields.Email()
-    ph_number = fields.String(validate=Length(min=10, max=10))
+    ph_number = fields.String(
+        validate=And(
+            Length(min=10, max=10, error="Phone numbers must be 10 characters"),
+            Regexp("^[0-9]*$", error="Phone numbers must only contain numbers"),
+        )
+    )
+    first_name = fields.String(
+        validate=And(
+            Regexp(
+                "^[a-zA-Z'-]+(?: [a-zA-Z'-]+)*$",
+                error="Names must not contain numbers or special characters besides hyphens, apostrophes and spaces",
+            ),
+            Length(min=2, error="First name must be at least 2 characters"),
+        )
+    )
 
     user = fields.Nested("UserSchema", exclude=["password", "is_admin", "is_teacher"])
-    
-    attendances=fields.List(fields.Nested("AttendanceSchema", exclude=['contact']))
+
+    attendances = fields.List(fields.Nested("AttendanceSchema", exclude=["contact"]))
 
     class Meta:
         ordered = True
         fields = ("first_name", "emergency_contact", "ph_number", "email")
-        

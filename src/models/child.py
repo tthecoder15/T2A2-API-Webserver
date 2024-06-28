@@ -4,6 +4,7 @@ from init import db, ma
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, ForeignKey
 from marshmallow import fields
+from marshmallow.validate import Regexp, And, Length
 
 
 class Child(db.Model):
@@ -24,7 +25,11 @@ class Child(db.Model):
 
 
 class ChildSchema(ma.Schema):
-  
+    first_name=fields.String(validate=And(Regexp("^[a-zA-Z'-]+(?: [a-zA-Z'-]+)*$", error="Names must not contain numbers or special characters besides hyphens, apostrophes and spaces"),
+    Length(min=2, error="First name must be at least 2 characters")))
+    last_name=fields.String(validate=And(Regexp("^[a-zA-Z'-]+(?: [a-zA-Z'-]+)*$", error="Names must not contain numbers or special characters besides hyphens, apostrophes and spaces"),
+    Length(min=2, error="Last name must be at least 2 characters")))
+    
     user=fields.Nested("UserSchema", exclude=["password", "is_admin", "is_teacher"])
     comments=fields.List(fields.Nested("CommentSchema", exclude=['child']))
     attendances=fields.List(fields.Nested("AttendanceSchema", only=['group']))
