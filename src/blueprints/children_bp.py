@@ -1,3 +1,6 @@
+"""Contains blueprint and endpoints for "Children", "Comments" and "Attendances entities.
+"""
+
 from datetime import datetime
 from flask import Blueprint, request
 from models.child import Child, ChildSchema
@@ -17,30 +20,146 @@ children_bp = Blueprint("child", __name__, url_prefix="/children")
 @children_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_children():
+    """Returns multiple child tuples based on user permissions. Endpoint for "GET" "/children".
+
+    Parameters
+    ----------
+    JWT: _auth token_
+        Required to request endpoint. Used to check user permissions.
+
+    Returns
+    -------
+    list: A list of dictionaries containing child instance data.
+
+    dict: Dictionary containing child instance data.
+        If user is an "Admin", all child instances are returned.
+        If user is a "Parent", only child instances registered to the user are returned.
+
+        Example:
+        {
+            [
+                {
+                    "id": 1,
+                    "user_id": 3,
+                    "first_name": "Kyle",
+                    "last_name": "Johnston",
+                    "attendances": [
+                        {
+                            "group": {
+                                "group_name": "Koalas",
+                                "day": "Thursday"
+                            }
+                        }
+                    ],
+                    "comments": [
+                        {
+                            "user": {
+                                "first_name": "Bobby",
+                                "id": 3
+                            },
+                            "date_created": "2024-06-28",
+                            "urgency": "neutral",
+                            "message": "Kyle slept poorly last night. He might not be energetic today."
+                        },
+                    ]
+                }
+            ]
+        }
+
+    dict: Dictionary describing a request error.
+    If user is a "Teacher", an error is returned.
+        Example:
+        {
+            "Error": "You are not authorised to access this resource"
+        }
+
+    int: A HTTP response code describing if the request was successful.
+        Example:
+            201
+    """
+
     user_id = get_jwt_identity()
+    # Creates local variable storing "Admin", "Parent" or "Teacher" for later permission checks
     user_type = user_status(user_id)
 
+    # If user is an "Admin", a database query selecting all "child" instances is submitted
+    # Returned SQLAlchemy objects are converted to dictionaries via marshmallow and returned to the user
     if user_type == "Admin":
         stmt = db.select(Child)
         children = db.session.scalars(stmt).all()
         return ChildSchema(many=True).dump(children)
+
+    # If user is a "Parent", a database query selecting all "child" instances with a matching "user_id" is submitted
+    # Returned SQLAlchemy objects are converted to dictionaries via marshmallow and returned to the user
     if user_type == "Parent":
         stmt = db.select(Child).where(Child.user_id == user_id)
         registered_children = db.session.scalars(stmt)
         return ChildSchema(many=True).dump(registered_children)
+
+    # If the user is not an "Admin" or "Parent" an error message is returned
     else:
         return {"Error": "You are not authorised to access this resource"}, 403
+
 
 # READ Child
 @children_bp.route("/<int:id>", methods=["GET"])
 @jwt_required()
 def get_child(id):
+    """Returns single child instance provided user has appropriate permissions. Endpoint for "GET" "/children/<int>".
+
+    Parameters
+    ----------
+    id: _int_
+        Passed in the URI, specifies which child to query based on child.id value in the database.
+    JWT: _auth token_
+        Required to request endpoint. Used to check user permissions.
+
+    Returns
+    -------
+    dict: Dictionary containing child instance data.
+        If the user is an "Admin", the requested child data is returned.
+        If the user is a "Parent", the child's "user_id" value are compared, if they match, the child data is returned.
+        Example:
+        {
+            "id": 2,
+            "user_id": 3,
+            "first_name": "Jason",
+            "last_name": "Wu",
+            "attendances":
+                [
+                    {
+                        "group": {
+                            "group_name": "Joeys",
+                            "day": "Thursday"
+                        }
+                    },
+                ],
+            "comments": []
+        }
+
+    dict: Dictionary describing a request error.
+        Example:
+        {
+            "Error": "You are not authorised to access this resource"
+        }
+
+    int: A HTTP response code describing if the request was successful.
+        Example:
+            201
+    """
+    # The database is queried for a "child" instance with an "id" value matching the submitted URI value
+    # If no matches are found, a 404 error is raised
     child = db.get_or_404(Child, id)
+    # A returned SQLAlchemy object is converted to a dictionary via marshmallow
     child_dict = ChildSchema().dump(child)
     user_id = get_jwt_identity()
+    # Creates local variable storing "Admin", "Parent" or "Teacher" for later permission checks
     user_type = user_status(user_id)
+    # If the user is an "Admin", the dictionary is returned
+    # If the user is not an "Admin", the dictionary's "user_id" value is compared to the user_id provided in the JWT
     if user_type == "Admin" or child_dict["user_id"] == user_id:
         return child_dict
+    # If the user is not an "Admin" or their JWT id does not match the requested child, an error is returned
     else:
         return {"Error": "You are not authorised to access this resource"}, 403
 
@@ -49,20 +168,65 @@ def get_child(id):
 @children_bp.route("/", methods=["POST"])
 @jwt_required()
 def register_child():
+    """Submits child instance to be recorded in the database. Endpoint for "POST" "/children".
+
+    Parameters
+    ----------
+    JWT: _auth token_
+        Required to request endpoint. Used to check user permissions.
+
+    user_id : _int_
+        If the user is an "Admin", user must provide "user_id" value in the request body.
+        If the user is a "Parent", "user_id" value is automatically taken from the provided JWT.
+    first_name : _str_
+        Passed in the request body, the value provided for the child instance's attribute "first_name".
+    last_name : _str_
+        Passed in the request body, the value provided for the child instance's attribute "last_name".
+
+    Returns
+    -------
+    dict: Dictionary containing recorded child instance data.
+        Example:
+        {
+            "Success": {
+                "first_name": "Robin",
+                "last_name": "Nolan",
+                "user_id": 3
+            }
+        }
+
+    dict: Dictionary describing a request error.
+        Example:
+        {
+            "Error": "This child is already registered to this user""
+        }
+
+    int: A HTTP response code describing if the request was successful.
+        Example:
+            201
+    """
+
     user_id = get_jwt_identity()
+    # Creates local variable storing "Admin", "Parent" or "Teacher" for later permission checks
     user_type = user_status(user_id)
 
+    # If user is not an "Admin" or "Parent" user, a 403 error message is returned.
     if user_type != "Admin" and user_type != "Parent":
         return {"Error": "You are not authorised to access this resource"}, 403
 
+    # Creates a dictionary using the provided request body and a marshmallow schema that mirrors the database's "child" table
     child_info = ChildSchema(only=["first_name", "last_name"], unknown="exclude").load(
         request.json
     )
+    # Creates a SQLAlchemy object using the values in the marshmallow-formatted dictionary
+    # The provided values are capitalised to sanitise them
     new_child = Child(
         first_name=child_info["first_name"].capitalize(),
         last_name=child_info["last_name"].capitalize(),
     )
 
+    # If the user is an "Admin", a database query checks if the provided "user_id" exists
+    # "Admin" users must provide the "user_id" value for the child instance in the request body
     if user_type == "Admin":
         stmt = db.select(User).where(User.id == request.json["user_id"])
         user = db.session.scalar(stmt)
@@ -72,22 +236,26 @@ def register_child():
             }, 400
         new_child.user_id = request.json["user_id"]
 
+    # If the user is a "Parent", the SQLAlchemy object's "user_id" value is automatically assigned the user's
     elif user_type == "Parent":
         new_child.user_id = user_id
 
-    # Check if child with the same f/l_name & user_id is in database already
+    # A database query checks if a child is already registered with the provided "first_name", "last_name" and "user_id" values
+    # An error is returned if the child already exists
     stmt = db.select(Child).where(
         Child.first_name == new_child.first_name,
         Child.last_name == new_child.last_name,
         Child.user_id == new_child.user_id,
     )
-
     child = db.session.scalar(stmt)
     if child:
         return {"Error": "This child is already registered to this user"}, 400
 
+    # The SQLAlchemy child object is submitted to the connected database
     db.session.add(new_child)
     db.session.commit()
+
+    # The submitted instance data is returned as a dictionary
     return {
         "Success": ChildSchema(only=["first_name", "last_name", "user_id"]).dump(
             new_child
@@ -99,23 +267,70 @@ def register_child():
 @children_bp.route("/<int:id>", methods=["PATCH"])
 @jwt_required()
 def update_child(id):
+    """Submits new values to update an existing child instance in the database. Endpoint for "PATCH" "/children/<int>".
+
+    Parameters
+    ----------
+    id: _int_
+        Passed in the URI, specifies which child instance to update from the database.
+    JWT: _auth token_
+        Required to request endpoint. Used to check user permissions.
+
+    first_name : _str_
+        Passed in the request body, the value provided to update the child instance's attribute "first_name". Optional.
+    last_name : _str_
+        Passed in the request body, the value provided to update the child instance's attribute "last_name". Optional.
+
+    Returns
+    -------
+    dict: Dictionary containing recorded child instance data.
+        If the user is authorised to update the child instance, the new values are returned in a dict.
+        Example:
+        {
+            "Success": {
+                "first_name": "Robin",
+                "last_name": "Nolan",
+                "user_id": 3
+            }
+        }
+
+    dict: Dictionary describing a request error.
+        If the request fails due to authentication or a request error, the error is described.
+        Example:
+        {
+            "Error": "This child is already registered to this user""
+        }
+
+    int: A HTTP response code describing if the request was successful.
+        Example:
+            201
+    """
+
     user_id = get_jwt_identity()
+    # Creates local variable storing "Admin", "Parent" or "Teacher" for later permission checks
     user_type = user_status(user_id)
+    # The database is queried for a "child" instance with an "id" value matching the submitted URI value
+    # If no matches are found, a 404 error is raised
     child = db.get_or_404(Child, id)
 
-    if "first_name" in request.json:
-        request.json["first_name"] = request.json["first_name"].capitalize()
-    if "last_name" in request.json:
-        request.json["last_name"] = request.json["last_name"].capitalize()
-
-    new_info = ChildSchema(
-        only=["first_name", "last_name"],
-        unknown="exclude",
-    ).load(request.json)
-    if new_info == {}:
-        return {"Error": "Please provide at least one value to update"}, 400
-
+    # If the user is an "Admin", a database query checks if the provided "user_id" exists
+    # "Admin" users must provide the "user_id" value for the child instance in the request body
     if user_type == "Admin" or child.user_id == user_id:
+
+        # If the request body contains a "first_name" value, it is capitalised
+        # If the request body contains a "last_name" value, it is capitalised
+        if "first_name" in request.json:
+            request.json["first_name"] = request.json["first_name"].capitalize()
+        if "last_name" in request.json:
+            request.json["last_name"] = request.json["last_name"].capitalize()
+
+        new_info = ChildSchema(
+            only=["first_name", "last_name"],
+            unknown="exclude",
+        ).load(request.json)
+        if new_info == {}:
+            return {"Error": "Please provide at least one value to update"}, 400
+
         child.first_name = request.json.get("first_name", child.first_name)
         child.last_name = request.json.get("last_name", child.last_name)
         db.session.commit()

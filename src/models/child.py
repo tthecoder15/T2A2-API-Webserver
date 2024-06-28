@@ -31,7 +31,7 @@ class ChildSchema(ma.Schema):
     Length(min=2, error="Last name must be at least 2 characters")))
     
     user=fields.Nested("UserSchema", exclude=["password", "is_admin", "is_teacher"])
-    comments=fields.List(fields.Nested("CommentSchema", exclude=['child']))
+    comments=fields.List(fields.Nested("CommentSchema", exclude=['child', 'comment_edited', 'date_edited']))
     attendances=fields.List(fields.Nested("AttendanceSchema", only=['group']))
 
 
