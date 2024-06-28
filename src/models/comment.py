@@ -20,7 +20,7 @@ class Comment(db.Model):
     user: Mapped["User"] = relationship(back_populates="comments")
 
     child_id: Mapped[int] = mapped_column(ForeignKey("children.id"))
-    children: Mapped["Child"] = relationship(back_populates="comments")
+    child: Mapped["Child"] = relationship(back_populates="comments")
 
 
 class CommentSchema(ma.Schema):
@@ -29,7 +29,7 @@ class CommentSchema(ma.Schema):
     urgency = fields.String(validate= OneOf(["urgent", "positive", "neutral"]))
     
     user = fields.Nested("UserSchema", only=['first_name', "id"])
-    child = fields.Nested("ChildSchema")
+    child = fields.Nested("ChildSchema", only=["id", "first_name", "last_name"])
 
     class Meta:
         ordered = True
