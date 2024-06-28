@@ -46,4 +46,4 @@ class ContactSchema(ma.Schema):
 
     class Meta:
         ordered = True
-        fields = ("first_name", "emergency_contact", "ph_number", "email")
+        fields = ("first_name", "attendances", "emergency_contact", "ph_number", "email")

@@ -64,16 +64,11 @@ def get_children():
             ]
         }
 
-    dict: Dictionary describing a request error.
-    If user is a "Teacher", an error is returned.
-        Example:
-        {
-            "Error": "You are not authorised to access this resource"
-        }
+    Raises
+    -------
+    403 Forbidden, User Identity Known: If the user does not have authorisation to access a child instance.
+    404 Not Found: If a child with the given "child_id" value does not exist.
 
-    int: A HTTP response code describing if the request was successful.
-        Example:
-            201
     """
 
     user_id = get_jwt_identity()
@@ -91,7 +86,7 @@ def get_children():
     # Returned SQLAlchemy objects are converted to dictionaries via marshmallow and returned to the user
     if user_type == "Parent":
         stmt = db.select(Child).where(Child.user_id == user_id)
-        registered_children = db.session.scalars(stmt)
+        registered_children = db.session.scalars(stmt).all()
         return ChildSchema(many=True).dump(registered_children)
 
     # If the user is not an "Admin" or "Parent" an error message is returned
@@ -135,15 +130,11 @@ def get_child(id):
             "comments": []
         }
 
-    dict: Dictionary describing a request error.
-        Example:
-        {
-            "Error": "You are not authorised to access this resource"
-        }
+    Raises
+    -------
+    403 Forbidden, User Identity Known: If the user does not have authorisation to access the child instance.
+    404 Not Found: If a child with the given "child_id" value does not exist.
 
-    int: A HTTP response code describing if the request was successful.
-        Example:
-            201
     """
     # The database is queried for a "child" instance with an "id" value matching the submitted URI value
     # If no matches are found, a 404 error is raised
@@ -193,15 +184,11 @@ def register_child():
             }
         }
 
-    dict: Dictionary describing a request error.
-        Example:
-        {
-            "Error": "This child is already registered to this user""
-        }
+    Raises
+    -------
+    403 Forbidden, User Identity Known: If the user does not have authorisation to register a child instance.
+    404 Not Found: If a child with the given "child_id" value does not exist.
 
-    int: A HTTP response code describing if the request was successful.
-        Example:
-            201
     """
 
     user_id = get_jwt_identity()
@@ -290,16 +277,12 @@ def update_child(id):
             }
         }
 
-    dict: Dictionary describing a request error.
-        If the request fails due to authentication or a request error, the error is described.
-        Example:
-        {
-            "Error": "This child is already registered to this user""
-        }
+    Raises
+    -------
+    400 Bad Request: If the user's request does not contain any appropriate fields or values to update.
+    403 Forbidden, User Identity Known: If the user does not have authorisation to access the child instance.
+    404 Not Found: If a child with the given "child_id" value does not exist.
 
-    int: A HTTP response code describing if the request was successful.
-        Example:
-            201
     """
 
     user_id = get_jwt_identity()
@@ -348,7 +331,7 @@ def update_child(id):
 @children_bp.route("/<int:id>", methods=["DELETE"])
 @jwt_required()
 def delete_child(id):
-    """Delete a child instance from the database with "id" value matching the URI submitted value. Endpoint for "DELETE" "/children/<int>".
+    """Deletes a child instance from the database with "id" value matching the URI submitted value. Endpoint for "DELETE" "/children/<int>".
 
     Parameters
     ----------
@@ -365,17 +348,13 @@ def delete_child(id):
                 "Success": "Child registration deleted"
             }
 
-    dict: Dictionary describing a request error.
-        If the request fails due to an authentication or request error, the error is described.
-        Example:
-            {
-                "Error": "No resource found"
-            }
+    Raises
+    -------
+    403 Forbidden, User Identity Known: If the user does not have authorisation to access the child instance.
+    404 Not Found: If a child with the given "child_id" value does not exist.
 
-    int: A HTTP response code describing if the request was successful.
-        Example:
-            200
     """
+
     user_id = get_jwt_identity()
     # Creates local variable storing "Admin", "Parent" or "Teacher" for later permission checks
     user_type = user_status(user_id)
@@ -433,16 +412,11 @@ def get_child_comments(id):
             ]
         }
 
-    dict: Dictionary describing a request error.
-    If user is a "Parent" and the child's "user_id" value does not match the user's, an error is returned.
-        Example:
-        {
-            "Error": "You are not authorised to access this resource"
-        }
+    Raises
+    -------
+    403 Forbidden, User Identity Known: If the user does not have authorisation to access the child instance.
+    404 Not Found: If a child with the given "child_id" value does not exist.
 
-    int: A HTTP response code describing if the request was successful.
-        Example:
-            200
     """
 
     user_id = get_jwt_identity()
@@ -481,7 +455,7 @@ def get_comment(id, id2):
     Parameters
     ----------
     id: _int_
-        Passed in the URI, specifies the id value of the child whose comments are queried.
+        Passed in the URI, specifies the id value of the child whose comment is queried.
     id2: _int_
         Passed in the URI, the id value of the comment requested.
     JWT: _auth token_
@@ -506,16 +480,11 @@ def get_comment(id, id2):
             "message": "Kyle slept poorly last night. He might not be energetic today."
         }
 
-    dict: Dictionary describing a request error.
-    If user is a "Parent" and the child's "user_id" value does not match the user's, an error is returned.
-        Example:
-        {
-            "Error": "You are not authorised to access this resource"
-        }
+    Raises
+    -------
+    403 Forbidden, User Identity Known: If the user does not have authorisation to access the comment.
+    404 Not Found: If a comment with the given "child_id" and "comment_id" values does not exist.
 
-    int: A HTTP response code describing if the request was successful.
-        Example:
-            200
     """
 
     user_id = get_jwt_identity()
@@ -525,12 +494,22 @@ def get_comment(id, id2):
     stmt = db.select(Comment).where(Comment.child_id == id, Comment.comment_id == id2)
     comment = db.session.scalar(stmt)
 
-    # Checks if a comment matching the input id values is found or returns a 404 error
+    # Checks if a comment matching the URI-input id values is in the database or returns a 404 error
     if comment:
 
         # Converts the retrieved comment SQLAlchemy object to a dict via marshmallow schema
         # Only converts "user_id", "first_name", "last_name" and "comments" data
-        comment_dict = CommentSchema(only=["child", "user", "comment_edited", "date_edited", "date_created", "urgency", "message"]).dump(comment)
+        comment_dict = CommentSchema(
+            only=[
+                "child",
+                "user",
+                "comment_edited",
+                "date_edited",
+                "date_created",
+                "urgency",
+                "message",
+            ]
+        ).dump(comment)
 
         # Checks if the user is authorised to retrieve the data
         # If the user is an "Admin" or "Teacher" or the child's "user_id" value matches the user's "id" value, the dict is returned
@@ -545,6 +524,7 @@ def get_comment(id, id2):
         else:
             return {"Error": "You are not authorised to access this resource"}, 403
 
+    # Error message returned if no comment matches the input child id and comment id values
     else:
         return {"Error": "No resource found"}, 404
 
@@ -553,19 +533,64 @@ def get_comment(id, id2):
 @children_bp.route("/<int:id>/comments", methods=["POST"])
 @jwt_required()
 def post_comment(id):
+    """Submits comment instance to be recorded in the database. Endpoint for "POST" "/children/<int>/comments".
+
+    Parameters
+    ----------
+    id: _int_
+        Passed in the URI, specifies the id value of the child linked to the comment.
+    JWT: _auth token_
+        Required to request endpoint. Used to check user permissions.
+
+    message : _str_
+        The string recorded as the comment's "message" attribute.
+    urgency : _str_
+        Passed in the request body, a string describing the quality of the comment.
+        Must be one of "urgent", "positive", "neutral".
+
+    Returns
+    -------
+    dict: Dictionary containing recorded comment instance data.
+        Example:
+        {
+            "Success": {
+                "child": {
+                    "id": 1,
+                    "first_name": "Kyle",
+                    "last_name": "Johnston"
+                },
+                "user": {
+                    "first_name": "Bobby",
+                    "id": 3
+                },
+                "date_created": "2024-06-28",
+                "urgency": "neutral",
+                "message": "Kyle has an injured finger. He may be sensitive today"
+            }
+        }
+
+    Raises
+    -------
+        403 Forbidden, User Identity Known: If the user does not have authorisation to post a comment about the child.
+        404 Not Found: If a child with the given "id" value does not exist.
+
+    """
     user_id = get_jwt_identity()
     user_type = user_status(user_id)
 
+    # Confirms user's account type is "Parent"
     if user_type == "Parent":
+        # Attempts to retrieve child instance with an "id" value matching input id or returns 404
         child = db.get_or_404(Child, id)
-        child_dict = ChildSchema().dump(child)
-
-        if child_dict["user_id"] != user_id:
+        # Checks if user's id equals the child instances "id" or returns 403 error
+        if child.id != user_id:
             return {"Error": "You are not authorised to access this resource"}, 403
 
+    # Screens any provided comment values via the marshmallow schema
     comment_info = CommentSchema(only=["message", "urgency"], unknown="exclude").load(
         request.json
     )
+    # Creates SQLAlchemy object in new_comment var
     new_comment = Comment(
         message=comment_info["message"],
         urgency=comment_info["urgency"],
@@ -573,58 +598,162 @@ def post_comment(id):
         child_id=id,
         date_created=datetime.now().date(),
     )
-
+    # Submits new_comment SQLAlchemy object to database
     db.session.add(new_comment)
     db.session.commit()
-    return {"Success": CommentSchema().dump(new_comment)}, 201
+    # Returns new comment data excluding "comment_edited" and "date_edited" values
+    return {
+        "Success": CommentSchema(exclude=["comment_edited", "date_edited"]).dump(
+            new_comment
+        )
+    }, 201
 
 
 # UPDATE Comment about child
 @children_bp.route("/<int:id>/comments/<int:id2>", methods=["PATCH"])
 @jwt_required()
 def update_comment(id, id2):
+    """Submits new values to update an existing comment instance in the database. Endpoint for "PATCH" "/children/<int>/comments/int".
+
+    Parameters
+    ----------
+    id: _int_
+        Passed in the URI, specifies the id value of the child whose comment is queried.
+    id2: _int_
+        Passed in the URI, the id value of the comment to update.
+    JWT: _auth token_
+        Required to request endpoint. Used to check user permissions.
+
+    Returns
+    -------
+    dict: Dictionary containing updated comment data.
+        "comment_edited" is automatically set to true after a successful "PATCH" request.
+        "date_edited" is automatically set to the date of the most recent successful "PATCH" request.
+
+        Example:
+        {
+            "child": {
+                "id": 1,
+                "first_name": "Kyle",
+                "last_name": "Johnston"
+            },
+            "user": {
+                "first_name": "Bobby",
+                "id": 3
+            },
+            "comment_edited": true,
+            "date_edited": "2024-06-28",
+            "date_created": "2024-06-28",
+            "urgency": "neutral",
+            "message": "Kyle has an injured leg today. He may be flat"
+        }
+
+    Raises
+    -------
+    400 Bad Request: If the user's request does not contain any appropriate fields or values to update.
+    403 Forbidden, User Identity Known: If the user does not have authorisation to access the comment instance.
+    404 Not Found: If a comment with the given "child_id" and "comment_id" values does not exist.
+
+    """
+
     user_id = get_jwt_identity()
+    # The database is queried for a "comment" with a "child_id" value matching id and a "comment_id" value matching id2
+    stmt = db.select(Comment).where(Comment.child_id == id, Comment.comment_id == id2)
+    comment = db.session.scalar(stmt)
 
-    if "urgency" in request.json:
-        request.json["urgency"] = request.json["urgency"].lower()
+    # Confirms a comment was retrieved or returns a 404 error
+    if comment:
+        # Checks if an "urgency" attribute is in the request and makes it lowercase
+        # This sanitises the data for the marshmallow model
+        if "urgency" in request.json:
+            request.json["urgency"] = request.json["urgency"].lower()
 
-    new_info = CommentSchema(
-        only=["message", "urgency"],
-        unknown="exclude",
-    ).load(request.json)
-    if new_info == {}:
-        return {"Error": "Please provide at least one value to update"}, 400
+        # Screens any provided attribute values via the marshmallow schema
+        new_info = CommentSchema(
+            only=["message", "urgency"],
+            unknown="exclude",
+        ).load(request.json)
 
-    comment = db.get_or_404(Comment, id2)
-    comment_dict = CommentSchema().dump(comment)
+        # Asserts that at least one value to update was provided or returns error
+        if new_info == {}:
+            return {"Error": "Please provide at least one value to update"}, 400
 
-    if comment_dict["user"]["id"] == user_id:
-        comment.message = request.json.get("message", comment.message)
-        comment.urgency = request.json.get("urgency", comment.urgency)
-        comment.comment_edited = True
-        comment.date_edited = datetime.now().date()
-        db.session.commit()
-        return CommentSchema().dump(comment), 200
+        # Checks if the comment's "user_id" value matches the user who submitted the "PATCH" request
+        if comment.user.id == user_id:
+            # Sets retrieved tuple's "message" value to the new provided value
+            # If no value is provided, "message" value remains as it was
+            comment.message = request.json.get("message", comment.message)
+            # Sets retrieved tuple's "urgency" value to the new provided value
+            # If no value is provided, "urgency" value remains as it was
+            comment.urgency = request.json.get("urgency", comment.urgency)
+            # Sets retrieved tuple's "comment_edited" value to True
+            comment.comment_edited = True
+            # Sets retrieved tuple's "date_edited" value to the current date
+            comment.date_edited = datetime.now().date()
+
+            # The updated comment is submitted to the connected database
+            db.session.commit()
+            return CommentSchema().dump(comment), 200
+        # If the comment's "user_id" value does not match the id value in the JWT token an error is returned
+        else:
+            return {"Error": "You are not authorised to access this resource"}, 403
+    # Error message returned if no comment matches the input child id and comment id values
     else:
-        return {"Error": "You are not authorised to access this resource"}, 403
+        return {"Error": "No resource found"}, 404
 
 
 # DELETE Comment about child
 @children_bp.route("/<int:id>/comments/<int:id2>", methods=["DELETE"])
 @jwt_required()
 def delete_comment(id, id2):
+    """Deletes a comment instance from the database. Endpoint for "DELETE" "/children/<int>/comments/int".
+
+    Parameters
+    ----------
+    id: _int_
+        Passed in the URI, specifies the id value of the child whose comment is to be deleted.
+    id2: _int_
+        Passed in the URI, the id value of the comment to delete.
+    JWT: _auth token_
+        Required to request endpoint. Used to check user permissions.
+
+    Returns
+    -------
+    dict: Dictionary confirming successful request.
+
+        Example:
+        {
+            "Success": "Comment deleted"
+        }
+
+    Raises
+    -------
+    403 Forbidden, User Identity Known: If the user does not have authorisation to access the comment instance.
+    404 Not Found: If a comment with the given "child_id" and "comment_id" values does not exist.
+    """
 
     user_id = get_jwt_identity()
+    # Creates local variable storing "Admin", "Parent" or "Teacher" for later permission checks
     user_type = user_status(user_id)
+    # The database is queried for a "comment" with a "child_id" value matching id and a "comment_id" value matching id2
+    stmt = db.select(Comment).where(Comment.child_id == id, Comment.comment_id == id2)
+    comment = db.session.scalar(stmt)
 
-    comment = db.get_or_404(Comment, id2)
-    comment_dict = CommentSchema().dump(comment)
-    if user_type == "Admin" or comment_dict["user"]["id"] == user_id:
-        db.session.delete(comment)
-        db.session.commit()
-        return {"Success": "Comment deleted"}, 200
+    # Confirms a comment was retrieved or returns a 404 error
+    if comment:
+        # Checks if the comment's "user_id" value matches the user who submitted the "PATCH" request or the user is an "Admin"
+        if user_type == "Admin" or comment.user.id == user_id:
+            # Deletes comment instance and commits delete to database
+            db.session.delete(comment)
+            db.session.commit()
+            # Returns successful deletion message
+            return {"Success": "Comment deleted"}, 200
+        # If the user is not authorised, an error message is returned
+        else:
+            return {"Error": "You are not authorised to access this resource"}, 403
+    # Error message returned if no comment matches the input child id and comment id values
     else:
-        return {"Error": "You are not authorised to access this resource"}, 403
+        return {"Error": "No resource found"}, 404
 
 
 # Attendances
@@ -632,43 +761,145 @@ def delete_comment(id, id2):
 @children_bp.route("/<int:id>/attendances", methods=["GET"])
 @jwt_required()
 def get_child_attendances(id):
+    """Returns attendance instances with "child_id" matching URI input id value. Endpoint for "GET" "/children/<int>/attendances".
+
+    Parameters
+    ----------
+    JWT: _auth token_
+        Required to request endpoint. Used to check user permissions.
+    id: _int_
+        Passed in the URI, specifies the id value of the child whose comment is to be deleted.
+
+    Returns
+    -------
+    dict: Dictionary containing all attendance instance data for submitted child_id.
+
+        Example:
+        [
+            {
+                "child_id": 1,
+                "child": {
+                    "id": 1,
+                    "user_id": 3,
+                    "first_name": "Kyle",
+                    "last_name": "Johnston"
+                },
+                "group": {
+                    "group_name": "Koalas",
+                    "day": "Thursday"
+                },
+                "contact": {
+                    "first_name": "Grandpa Joe",
+                    "emergency_contact": false,
+                    "ph_number": "0488111333",
+                    "email": "No email provided"
+                }
+            }
+        ]
+
+    Raises
+    -------
+    403 Forbidden, User Identity Known: If the user does not have authorisation to access a child instance.
+    404 Not Found: If no attendances with input the "child_id" value does not exist.
+
+    """
     user_id = get_jwt_identity()
+    # Creates local variable storing "Admin", "Parent" or "Teacher" for later permission checks
     user_type = user_status(user_id)
-
-    child = db.get_or_404(Child, id)
-    child_dict = ChildSchema(
-        only=["user_id", "first_name", "last_name", "attendances"]
-    ).dump(child)
-
-    if (
-        user_type == "Admin"
-        or user_type == "Teacher"
-        or child_dict["user_id"] == user_id
-    ):
-        return child_dict
-
-    return {"Error": "You are not authorised to access this resource"}, 403
+    # Queries database for attendances where the child_id is equal to the URI input id value
+    stmt = db.select(Attendance).where(Attendance.child_id == id)
+    attendances = db.session.scalars(stmt).all()
+    # Checks if any attendances were returned and returns error if not
+    if attendances:
+        # Converts returned SQLAlchemy objects to a dict
+        attendances_dict = AttendanceSchema(many=True).dump(attendances)
+        # Checks if the user is authorised to access the dictionary data based on user type
+        if (
+            user_type == "Admin"
+            or user_type == "Teacher"
+            # Checks if first returned attendance's nested "child" instance has a "user_id" value equal to the requesting user's id
+            or attendances_dict[0]["child"]["user_id"] == user_id
+        ):
+            # Returns a dictionary containing all attendances
+            return attendances_dict
+        else:
+            # Returns an error if the user is not authorised
+            return {"Error": "You are not authorised to access this resource"}, 403
+    # Error message returned if no attendances have a child_id matching the URI input id value
+    else:
+        return {"Error": "No resource found"}, 404
 
 
 # READ child's single attendance
 @children_bp.route("/<int:id>/attendances/<int:id2>", methods=["GET"])
 @jwt_required()
 def get_attendance(id, id2):
+    """Returns attendance "child_id" matching URI input id value and "id" value matching id2 input. Endpoint for "GET" "/children/<int>/attendances".
 
+    Parameters
+    ----------
+    JWT: _auth token_
+        Required to request endpoint. Used to check user permissions.
+    id: _int_
+        Passed in the URI, specifies the id value of the child whose attendances are queried.
+    id2: _int_
+        Passed in the URI, the id value of the attendance to query.
+        
+    Returns
+    -------
+    dict: Dictionary containing and attendance's data.
+
+        Example:
+        [
+            {
+                "child_id": 1,
+                "child": {
+                    "id": 1,
+                    "user_id": 3,
+                    "first_name": "Kyle",
+                    "last_name": "Johnston"
+                },
+                "group": {
+                    "group_name": "Koalas",
+                    "day": "Thursday"
+                },
+                "contact": {
+                    "first_name": "Grandpa Joe",
+                    "emergency_contact": false,
+                    "ph_number": "0488111333",
+                    "email": "No email provided"
+                }
+            }
+        ]
+
+    Raises
+    -------
+    403 Forbidden, User Identity Known: If the user does not have authorisation to access a child instance.
+    404 Not Found: If no attendances with input the "child_id" value does not exist.
+
+    """
     user_id = get_jwt_identity()
+    # Creates local variable storing "Admin", "Parent" or "Teacher" for later permission checks
     user_type = user_status(user_id)
+    # The database is queried for an "attendance" with a "child_id" value matching id and an attendance "id" value matching id2
+    stmt = db.select(Attendance).where(Attendance.child_id == id, Attendance.id == id2)
+    attendance = db.session.scalar(stmt)
+    
+    # Confirms an attendance was retrieved or returns a 404 error
+    if attendance:
+        # Checks if the user is an "Admin", "Teacher" or the child's registered user_id equals the request user's
+        if (
+            user_type == "Admin"
+            or user_type == "Teacher"
+            or attendance.child.user_id == user_id
+        ):
+            return attendance
 
-    attendance = db.get_or_404(Attendance, id2)
-    attendance_dict = AttendanceSchema().dump(attendance)
+        return {"Error": "You are not authorised to access this resource"}, 403
 
-    if (
-        user_type == "Admin"
-        or user_type == "Teacher"
-        or attendance_dict["child"]["user_id"] == user_id
-    ):
-        return attendance_dict
-
-    return {"Error": "You are not authorised to access this resource"}, 403
+    # Error message returned if no attendance matches the input child id and attendance id values
+    else:
+        return {"Error": "No resource found"}, 404
 
 
 # CREATE child's attendance

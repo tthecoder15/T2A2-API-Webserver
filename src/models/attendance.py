@@ -7,7 +7,7 @@ from marshmallow import fields
 
 class Attendance(db.Model):
     __tablename__ = "attendances"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    attendance_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
     child_id: Mapped[int] = mapped_column(ForeignKey("children.id"))
     child: Mapped["Child"] = relationship(back_populates="attendances")
@@ -20,11 +20,12 @@ class Attendance(db.Model):
 
 
 class AttendanceSchema(ma.Schema):
-    child = fields.Nested("ChildSchema", only=["user_id", "first_name", "last_name"], exclude=["attendances"])
+    
+    child = fields.Nested("ChildSchema", only=["id", "user_id", "first_name", "last_name"], exclude=["attendances"])
     group = fields.Nested("GroupSchema", only=["group_name", "day"])
     contact = fields.Nested("ContactSchema", exclude=["attendances"])
 
 
     class Meta:
         ordered = True
-        fields = ("child", "group", "contact")
+        fields = ("id", "child_id", "child", "group", "contact")
