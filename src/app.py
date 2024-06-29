@@ -41,9 +41,9 @@ def integrity_error(err):
     return {"Error": str(vars(err)["orig"])}, 400
 
 
-# @app.errorhandler(KeyError)
-# def missing_key(err):
-#     return {"Error": f"Request is missing field: {str(err)}"}, 400
+@app.errorhandler(KeyError)
+def missing_key(err):
+    return {"Error": f"Request is missing field: {str(err)}"}, 400
 
 
 @app.errorhandler(TypeError)

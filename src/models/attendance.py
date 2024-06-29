@@ -28,4 +28,4 @@ class AttendanceSchema(ma.Schema):
 
     class Meta:
         ordered = True
-        fields = ("id", "child_id", "child", "group", "contact")
+        fields = ("attendance_id", "child_id", "child", "group", "contact")

@@ -1,14 +1,14 @@
-"""Contains blueprint and endpoints for "Children", "Comments" and "Attendances entities.
+"""Contains blueprint formatting and endpoints for "Children", "Comments" and "Attendances" entities.
 """
 
 from datetime import datetime
 from flask import Blueprint, request
 from models.child import Child, ChildSchema
 from models.comment import Comment, CommentSchema
+from models.contact import Contact
 from models.attendance import Attendance, AttendanceSchema
 from models.user import User
 from init import db
-
 from auth import user_status
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -834,7 +834,7 @@ def get_child_attendances(id):
 @children_bp.route("/<int:id>/attendances/<int:id2>", methods=["GET"])
 @jwt_required()
 def get_attendance(id, id2):
-    """Returns attendance "child_id" matching URI input id value and "id" value matching id2 input. Endpoint for "GET" "/children/<int>/attendances".
+    """Returns single attendance as a dictionary. Endpoint for "GET" "/children/<int>/attendances/<int>".
 
     Parameters
     ----------
@@ -844,10 +844,10 @@ def get_attendance(id, id2):
         Passed in the URI, specifies the id value of the child whose attendances are queried.
     id2: _int_
         Passed in the URI, the id value of the attendance to query.
-        
+
     Returns
     -------
-    dict: Dictionary containing and attendance's data.
+    dict: Dictionary containing an attendance's data including child, group and contact instance data.
 
         Example:
         [
@@ -874,26 +874,29 @@ def get_attendance(id, id2):
 
     Raises
     -------
-    403 Forbidden, User Identity Known: If the user does not have authorisation to access a child instance.
-    404 Not Found: If no attendances with input the "child_id" value does not exist.
+    403 Forbidden, User Identity Known: If the user does not have authorisation to access the attendance instance.
+    404 Not Found: If no attendances with input the "child_id" and "attendance_id" values does not exist.
 
     """
     user_id = get_jwt_identity()
     # Creates local variable storing "Admin", "Parent" or "Teacher" for later permission checks
     user_type = user_status(user_id)
     # The database is queried for an "attendance" with a "child_id" value matching id and an attendance "id" value matching id2
-    stmt = db.select(Attendance).where(Attendance.child_id == id, Attendance.id == id2)
+    stmt = db.select(Attendance).where(
+        Attendance.child_id == id, Attendance.attendance_id == id2
+    )
     attendance = db.session.scalar(stmt)
-    
     # Confirms an attendance was retrieved or returns a 404 error
     if attendance:
-        # Checks if the user is an "Admin", "Teacher" or the child's registered user_id equals the request user's
+        # Converts returned SQLAlchemy object to a dict
+        attendance_dict = AttendanceSchema().dump(attendance)
+        # Checks if the user is an "Admin", "Teacher" or the attendance's child user_id value equals the request user's
         if (
             user_type == "Admin"
             or user_type == "Teacher"
-            or attendance.child.user_id == user_id
+            or attendance_dict["child"]["user_id"] == user_id
         ):
-            return attendance
+            return attendance_dict
 
         return {"Error": "You are not authorised to access this resource"}, 403
 
@@ -906,15 +909,67 @@ def get_attendance(id, id2):
 @children_bp.route("/<int:id>/attendances", methods=["POST"])
 @jwt_required()
 def post_attendance(id):
+    """Submits attendance instance to be recorded in the database. Endpoint for "POST" "/children/<int>/attendances".
+
+    Parameters
+    ----------
+    id: _int_
+        Passed in the URI, specifies the id value of the child linked to the comment.
+    JWT: _auth token_
+        Required to request endpoint. Used to check user permissions.
+
+    group_id : _int_
+        Passed in the request body, the group id value that describes which group the child attends
+    contact_id : _int_
+        Passed in the request body, the contact id value that describes the child's contact for the attendance.
+
+    Returns
+    -------
+    dict: Dictionary containing successfully recorded attendance instance data.
+        Example:
+        {
+            "Success": {
+                    "attendance_id": 7,
+                    "child_id": 1,
+                    "child": {
+                    "id": 1,
+                    "user_id": 3,
+                    "first_name": "Kyle",
+                    "last_name": "Johnston"
+                },
+                "group": {
+                    "group_name": "Joeys",
+                    "day": "Thursday"
+                },
+                "contact": {
+                    "first_name": "Joe",
+                    "emergency_contact": false,
+                    "ph_number": "0488111333",
+                    "email": "No email provided"
+                }
+            }
+        }
+
+    Raises
+    -------
+        400 Bad Request: If the user submits an attendance that has the same child_id and group_id as one in the database or a user submits a contact not registered to their account.
+        403 Forbidden, User Identity Known: If the user does not have authorisation to post an attendance for the child.
+        404 Not Found: If a child with the given "id" value does not exist.
+
+    """
+
     user_id = get_jwt_identity()
     user_type = user_status(user_id)
 
     if user_type == "Parent":
         child = db.get_or_404(Child, id)
-        child_dict = ChildSchema().dump(child)
-
-        if child_dict["user_id"] != user_id:
+        if child.user_id != user_id:
             return {"Error": "You are not authorised to access this resource"}, 403
+        contact = db.get_or_404(Contact, request.json["contact_id"])
+        if contact.user_id != user_id:
+            return {
+                "Error": "Please enter a contact_id registered to your account"
+            }, 400
 
     elif user_type == "Teacher":
         return {"Error": "You are not authorised to access this resource"}, 403
@@ -943,36 +998,149 @@ def post_attendance(id):
 @children_bp.route("/<int:id>/attendances/<int:id2>", methods=["PATCH"])
 @jwt_required()
 def update_attendance(id, id2):
-    user_id = get_jwt_identity()
+    """Submits new values to update an existing attendance instance in the database. Endpoint for "PATCH" "/children/<int>/attendances/<int>".
 
+    Parameters
+    ----------
+    id: _int_
+        Passed in the URI, specifies the id value of the child whose comment is queried.
+    id2: _int_
+        Passed in the URI, the id value of the attendance to update.
+    JWT: _auth token_
+        Required to request endpoint. Used to check user permissions.
+
+    Returns
+    -------
+    dict: Dictionary containing updated and saved attendance data.
+        Example:
+        {
+            "Success": {
+                "attendance_id": 1,
+                "child_id": 1,
+                "child": {
+                    "id": 1,
+                    "user_id": 3,
+                    "first_name": "Kyle",
+                    "last_name": "Johnston"
+                },
+                "group": {
+                    "group_name": "Koalas",
+                    "day": "Thursday"
+                },
+                "contact": {
+                    "first_name": "Bobby",
+                    "emergency_contact": true,
+                    "ph_number": "0488999444",
+                    "email": "No email provided"
+                }
+            }
+        }
+
+    Raises
+    -------
+    400 Bad Request: If the user's request does not contain any appropriate fields or values to update.
+    403 Forbidden, User Identity Known: If the user does not have authorisation to access the attendance instance.
+    404 Not Found: If a comment with the given "child_id" and "comment_id" values does not exist.
+
+    """
+
+    user_id = get_jwt_identity()
+    # Creates local variable storing "Admin", "Parent" or "Teacher" for later permission checks
+    user_type = user_status(user_id)
+
+    # Checks that at least one valid field is provided in the response body to update
+    # If not, an error is returned
     if "group_id" not in request.json and "contact_id" not in request.json:
         return {"Error": "Please provide at least one value to update"}, 400
 
-    attendance = db.get_or_404(Attendance, id2)
-    attendance_dict = AttendanceSchema().dump(attendance)
+    # The database is queried for an "attendance" with a "child_id" value matching id and an attendance "id" value matching id2
+    stmt = db.select(Attendance).where(
+        Attendance.child_id == id, Attendance.attendance_id == id2
+    )
+    attendance = db.session.scalar(stmt)
 
-    if attendance_dict["child"]["user_id"] == user_id:
-        attendance.group_id = request.json.get("group_id", attendance.group_id)
-        attendance.contact_id = request.json.get("contact_id", attendance.contact_id)
-        db.session.commit()
-        return AttendanceSchema().dump(attendance), 200
+    # Confirms an attendance was retrieved or returns a 404 error
+    if attendance:
+        # Converts returned SQLAlchemy object to a dict
+        attendance_dict = AttendanceSchema().dump(attendance)
+
+        # Checks if the attendance's child is registered to the user or the user is an admin or returns an error
+        if attendance_dict["child"]["user_id"] == user_id or user_type == "Admin":
+            # Sets the retrieved attendance's "group_id" value to the one provided in the request
+            # If no new value is provided, it remains as it was
+            attendance.group_id = request.json.get("group_id", attendance.group_id)
+            # Sets the retrieved attendance's "contact_id" value to the one provided in the request
+            # If no new value is provided, it remains as it was
+            attendance.contact_id = request.json.get(
+                "contact_id", attendance.contact_id
+            )
+            # Submits changes to the database and returns the complete attendance dict as submitted
+            db.session.commit()
+            return {"Success": AttendanceSchema().dump(attendance)}, 200
+        # Error message is returned if the user is not authorised to update the attendance
+        else:
+            return {"Error": "You are not authorised to access this resource"}, 403
+
+    # Error message returned if no attendance matches the input child id and attendance id values
     else:
-        return {"Error": "You are not authorised to access this resource"}, 403
+        return {"Error": "No resource found"}, 404
 
 
 # DELETE child's Attendance
 @children_bp.route("/<int:id>/attendances/<int:id2>", methods=["DELETE"])
 @jwt_required()
 def delete_attendance(id, id2):
+    """Deletes an attendance from the database. Endpoint for "DELETE" "/children/<int>/attendances/<int>".
 
+    Parameters
+    ----------
+    id: _int_
+        Passed in the URI, specifies the id value of the child whose comment is queried.
+    id2: _int_
+        Passed in the URI, the id value of the attendance to update.
+    JWT: _auth token_
+        Required to request endpoint. Used to check user permissions.
+
+    Returns
+    -------
+    dict: Dictionary describing the request's success.
+        Example:
+            {
+                "Success": "Attendance deleted"
+            }
+
+    Raises
+    -------
+    403 Forbidden, User Identity Known: If the user does not have authorisation to access the child instance.
+    404 Not Found: If a child with the given "child_id" value does not exist.
+
+    """
     user_id = get_jwt_identity()
+    # Creates local variable storing "Admin", "Parent" or "Teacher" for later permission checks
     user_type = user_status(user_id)
 
-    attendance = db.get_or_404(Attendance, id2)
-    attendance_dict = AttendanceSchema().dump(attendance)
-    if user_type == "Admin" or attendance_dict["child"]["user_id"] == user_id:
-        db.session.delete(attendance)
-        db.session.commit()
-        return {"Success": "Attendance deleted"}, 200
+    # The database is queried for an "attendance" with a "child_id" value matching id and an attendance "id" value matching id2
+    stmt = db.select(Attendance).where(
+        Attendance.child_id == id, Attendance.attendance_id == id2
+    )
+    attendance = db.session.scalar(stmt)
+
+    # Confirms an attendance was retrieved or returns a 404 error
+    if attendance:
+        # Converts returned SQLAlchemy object to a dict to query user_id associated
+        attendance_dict = AttendanceSchema().dump(attendance)
+
+        # Checks if the attendance's child is registered to the user or the user is an admin or returns an error
+        if attendance_dict["child"]["user_id"] == user_id or user_type == "Admin":
+            # Deletes attendance and commits change to the database
+            db.session.delete(attendance)
+            db.session.commit()
+            # Returns successful deletion message
+            return {"Success": "Attendance deleted"}, 200
+        # Error message is returned if the user is not authorised to update the attendance
+        else:
+            return {"Error": "You are not authorised to access this resource"}, 403
+
+    # Error message returned if no attendance matches the input child id and attendance id values
     else:
-        return {"Error": "You are not authorised to access this resource"}, 403
+        return {"Error": "No resource found"}, 404
