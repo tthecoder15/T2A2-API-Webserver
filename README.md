@@ -71,9 +71,36 @@ Brede Moe, N., Dingsøyr, T., Dyba, T. (2014) 'Agile Project Management', in Ruh
 
 * The description provided is DETAILED, and the description details ALL of the services, packages or dependencies that are used in the developed application.
 
+bcrypt==4.1.3
+Flask-JWT-Extended==4.6.0
+Flask==3.0.3
+marshmallow-sqlalchemy==1.0.0
+python-dotenv==1.0.1
+psycopg2
+
 ## R4. Explain the benefits and drawbacks of this app’s underlying database system /6
 
-* Identifies an appropriate database system and DESCRIBES benefits and/or drawbacks to a THOROUGH level of detail.
+This app uses a PostgreSQL (Postgres) database, connected via psycopg2 to store data in a relational manner. PostgreSQL is a robust, open-source database that is freely accessible on all major operating systems. This is a key benefit for this application as it means that users can initialise this API on their systems without assuming overhead costs altering their hardware or gaining access to the prescribed database software.
+
+In addition, when choosing a database for this application, PostgreSQL is a favourable choice due to its prominence in back-end development. Flask, SQLAlchemy and psycopg2 are highly developed packages which work seamlessly with Postgres databases. These packages were key to the app's development. To initialise this API, users simply have to install the app's dependencies, create a PostgreSQL database, link it to the app and run Flask. The default install of Postgres contains all neccessary features required.
+
+PostgreSQL is also ACID (Atomicity, Consistency, Isolation, Durability) compliant meaning that connection errors will not corrupt the database records as they existed (PostgreSQL Documentation, n.d.). ACID compliance is key for APIs where users may lose connectivity with the database due to servers failing.
+
+One drawback of using PostgreSQL for this app's database is that Postgres databases cannot be stored on the cloud. Postgres does not contain functionality to host databases on the cloud and, instead, a service such as Google's "Cloud SQL" by would be required for online storage. Notably, these services can mirror the functionality of a local Postgres database and could be utilised without much configuration required if the app's database needed to be stored remotely (Google Cloud, 2024).
+
+Another main drawback of Postgres is its speed and resource intensiveness. If this app were adopted and scaled widely, it would require a relatively powerful server to host it with good performance. By extension, query speeds will likely be slower than if the app were built on, key competitor, MySQL, a persistent critique of Postgres (Amazon Web Services, 2024).
+
+Notably, using an ORM mitigates some of the traditional drawbacks of Postgres such as its strict semantics and difficult syntax. This app's endpoints and error handling attempts to mitigate the confusing elements of querying and recording data to a Postgres database. Similarly, using the models and endpoints within this app may make it easier to migrate data if the database used needed to be moved, a typical challenge of Postgres (Hanlon et al., 2011).
+
+### References
+
+Amazon Web Services (2024) _[What is SQL?](https://aws.amazon.com/what-is/sql/)_, AWS website, accessed 29 June 2024.
+
+Google Cloud (2024) _[Cloud SQL for PostgreSQL features](https://cloud.google.com/sql/docs/postgres/features)_, Google Cloud website, accessed 29 June 2024.
+
+Hanlon, M., Dooley, R., Mock, S., Dahan, M., Nuthulapati, P. & Hurley, P. (2011). _Benefits of NoSQL databases for portals & science gateways_. DOI:[10.1145/2016741.2016780](https://doi.org/10.1145/2016741.2016780).
+
+PostgreSQL Documentation (n.d.) _[About](https://www.postgresql.org/about)_, PostgreSQL website, accessed 29 June 2024.
 
 ## R5. Explain the features, purpose and functionalities of the object-relational mapping system (ORM) used in this app /6
 
