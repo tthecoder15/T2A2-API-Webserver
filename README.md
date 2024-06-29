@@ -63,6 +63,9 @@ The Trello board after eight days of work.
 ![Trello Board screenshot after day 9](docs/agile-10.png)
 The Trello board after nine days of work. During this day I troubleshooted some errors and progressed code comments but did not finish them. I also adjusted the project management timelines.
 
+![Trello Board screenshot after day 10](docs/agile-11.png)
+The Trello board after 10 days of work. After realising that code commenting was taking an extensive time, I decided to answer remaining questions first, as a more important consideration. This sets me up for a smooth final day of work where I only have to finish 2 questions before completing the code comments.
+
 ### References
 
 Brede Moe, N., Dingsøyr, T., Dyba, T. (2014) 'Agile Project Management', in Ruhe, G., Wohlin, C. (eds.) _Software Project Management in a Changing World_. Berlin: Springer-Verlag, pp. 277-300.
