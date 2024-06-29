@@ -2,7 +2,7 @@
 
 This is a repository for my API Webserver Project.
 
-## R1. Explain the problem that this app will solve, and explain how this app solves or addresses the problem
+## R1. Explain the problem that this app will solve, and explain how this app solves or addresses the problem /6
 
 When running a service that involves looking after children, such as an after school care or class, it is vital that teachers and parents can contact eachother timely and easily. Children may become unwell or injured, or parents might simply want to stay informed about what activities their child is completing. However, a child's living situation or contact can change week-to-week or on certain days and it is difficult for businesses to have real-time knowledge on this information. For example, a child may have their parent pick them up on a Wednesday whilst a grandparent may pick them up on a Thursday.For these reasons, it is beneficial to have a centralised database that can ease teacher communication with parents and deliver up-to-date information to both sides.
 
@@ -26,7 +26,7 @@ This API provides a free alternative to expensive competitors and, being publish
 
 [Xap pricing](https://xap.net.au/pricing/)
 
-## R2. Describe the way tasks are allocated and tracked in your project
+## R2. Describe the way tasks are allocated and tracked in your project /6
 
 For this project, I am using an Agile workflow supplemented by a Trello board as a digital Kanban board (Brede Moe et al., 2014). To do this, I split the overall tasks into smaller tasks and categorised them based on their urgency and impact on other tasks. I entered this information onto my project Trello board, divided my available time and added deadlines to the tasks. I then maintained this Trello board and documented my progress with screenshots at the end of each day. At the beginning of the following day, I reviewed my progress from the prior day, made any neccessary adjustments to the checklist and deadlines and prioritised the next cluster of tasks.
 
@@ -67,7 +67,72 @@ The Trello board after nine days of work. During this day I troubleshooted some 
 
 Brede Moe, N., Dingsøyr, T., Dyba, T. (2014) 'Agile Project Management', in Ruhe, G., Wohlin, C. (eds.) _Software Project Management in a Changing World_. Berlin: Springer-Verlag, pp. 277-300.
 
-## R6. Design an entity relationship diagram (ERD) for this app’s database, and explain how the relations between the diagrammed models will aid the database design
+## R3. List and explain the third-party services, packages and dependencies used in this app /6
+
+* The description provided is DETAILED, and the description details ALL of the services, packages or dependencies that are used in the developed application.
+
+## R4. Explain the benefits and drawbacks of this app’s underlying database system /6
+
+* Identifies an appropriate database system and DESCRIBES benefits and/or drawbacks to a THOROUGH level of detail.
+
+## R5. Explain the features, purpose and functionalities of the object-relational mapping system (ORM) used in this app /6
+
+Object relational models (ORMs) are software packages that ease the conversion of code from one coding language into another language to interact with a relational database. In this application, SQLAlchemy is used to convert Python code to SQL for interaction with a PostgreSQL database. Using SQLAlchemy classes, the app contains models to create Pythonic objects that mirror entities stored in a connected relational database. This allows for object-oriented programming on the Pythonic side (Abba, 2022). Returned objects from the database are then interacted-with and sometimes altered, reformatted into SQL and sent for long-term storage in the connected database. Long-term storage is a particular advantage granted by ORMs and database storage as, otherwise, a Python application may not be able to preserve state between the app being started, closed and reopened (GeeksforGeeks, 2024).
+
+The app uses SQLAlchemy's provided classes and methods to mirror the entities in a connected database. The following is an example of the "User" model built to interact with a "users" table in a connected relational database:
+
+```Python
+    class User(db.Model):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    email: Mapped[str] = mapped_column(String(200))
+    password: Mapped[Optional[str]] = mapped_column(String(200))
+    first_name: Mapped[str] = mapped_column(String(200))
+    is_admin: Mapped[bool] = mapped_column(Boolean(), server_default="false")
+    is_teacher: Mapped[bool] = mapped_column(Boolean(), server_default="false")
+
+    children: Mapped[List["Child"]] = relationship(
+        back_populates="user", cascade="all, delete"
+    )
+
+    comments: Mapped[List["Comment"]] = relationship(
+        back_populates="user", cascade="all, delete"
+    )
+
+    contacts: Mapped[List["Contact"]] = relationship(
+        back_populates="user", cascade="all, delete"
+    )
+
+```
+
+Each model in the app uses an SQLAlchemy instance, "db", that contains SQLAlchemy's methods for converting Pythonic data structures to SQL formatting. The User class uses these to describe each attribute stored in the "users" table and its data quality. In the above model, id is an integer that represents the primary key for "user" instances, email, password and first_name are all strings with a maximum length of 200 and is_admin and is_teacher are boolean values. As seen above, the model can also describe default values so that, if the model is used to record an instance in the database and no value is provided for the attribute, the default is used. The attributes "children", "comments" and "contacts" all represent seperate entities that are linked with the "users" table via foreign key. The ORM associates these foreign tables with the "User" model so that joined results can be returned when the Python application communicates with the database.
+
+Another key feature of the ORM is its ability to craft complex SQL queries using simple Pythonic code.
+
+```Python
+        stmt = db.select(User).where(User.id == request.json["user_id"])
+        user = db.session.scalar(stmt)
+```
+
+The stmt variable uses SQLAlchemy's methods (called from the db object) to generate a query statement. The statement generates a query requesting each of the values noted in the "User" and specifies the condition that the "id" value must equal the "user_id" value passed in a request body. The generated statement is this:
+
+```SQL
+    SELECT users.id, users.email, users.password, users.first_name, users.is_admin, users.is_teacher 
+    FROM users 
+    WHERE users.id = :id_1
+```
+
+This statement is then passed to the database using the db.session.scalar() method which returns any matched instances as a scalar object. These scalars can then be interacted with in the application.
+
+Vitally, ORMs allow for simplified interaction between distinct coding languages such as Python and SQL. In this application, SQLAlchemy facilitates the conversion of Python data structures to SQL formatted code and objects. Without an ORM, the app would require its own unique code for mirroring the data structures in the connection database for any communication between the software. In addition, the ORMs robust structure and formatting provides some security measures as the SQL statement generation is abstracted away from the app's modules (GeeksforGeeks, 2024).
+
+### References
+
+Abba, I. V. (2022) _[What is an ORM – The Meaning of Object Relational Mapping Database Tools](https://www.freecodecamp.org/news/what-is-an-orm-the-meaning-of-object-relational-mapping-database-tools/)_, FreeCodeCamp website, accessed 29 June 2024.
+
+GeeksforGeeks (2024) _[What is Object-Relational Mapping (ORM) in DBMS?](https://www.geeksforgeeks.org/what-is-object-relational-mapping-orm-in-dbms/)_, GeeksforGeeks website, accessed 29 June 2024.
+
+## R6. Design an entity relationship diagram (ERD) for this app’s database, and explain how the relations between the diagrammed models will aid the database design /12
 
 ### This should focus on the database design BEFORE coding has begun, eg. during the project planning or design phase
 
@@ -99,7 +164,51 @@ Attendances are a join table created to enforce data normalisation. Attendance d
 
 Abba, I (2022) _[Crow's Foot Notation – Relationship Symbols And How to Read Diagrams](https://www.freecodecamp.org/news/crows-foot-notation-relationship-symbols-and-how-to-read-diagrams/)_, FreeCodeCamp website, accessed 19 June 2024.
 
-## R8. Explain how to use this application’s API endpoints. Each endpoint should be explained, including the following data for each endpoint
+## R7. Explain the implemented models and their relationships, including how the relationships aid the database implementation
+
+### This should focus on the database implementation AFTER coding has begun, eg. during the project development phase /6
+
+* Provides a BRIEF description about the project’s models and their relationships, and includes BRIEF information about how the relationships of the models interact with other models, and includes information about the queries that could be used to access data using the models’ relationships and includes appropriate code examples supporting the descriptions.
+
+User is the core model of this app and facilitates a user's interaction with the app. The user entity describes a unique account which has an email and password and carries an individual's privileges in the boolean values is_admin and is_teacher. These values are queried throughout the application to grant or bar access to instances that were not linked to the user's profile such as registered children or contacts. In addition, a user's id value is passed when registering a child, comment or contact instance as well for further privilege checks.
+
+```Python
+user_type = user_status(user_id)
+
+if user_type == "Parent":
+        stmt = db.select(Child).where(Child.user_id == user_id)
+        registered_children = db.session.scalars(stmt).all()
+        return ChildSchema(many=True).dump(registered_children)
+```
+
+In this code extract from the "get_children" function, the "user_status" function accepts the user's id value (as passed via their JWT) and returns a description of their user type and privileges. This is then referred to later to designate which SQL query is sent to the database. If the user is a "Parent", the database is queried for any child instances where the child's user_id value matches the requesting user's id. Any returned results are then returned to the user. Alternatively, when requesting a single child's data, if the child's user_id does not match the user's id, they are returned a 403 unauthorised HTTP error. Meanwhile, someone with a "True" is_admin value can access both. In other interactions, these values function differently. A parent can only post comments linked to their own registered children but a teacher account or admin can post comments linked to any child.
+
+Child instances are the next most significant entity and provide foreign keys for comments and attendances. Comments take user_id and child_id as foreign keys to describe which child is being commented on and by who.
+
+The user_id, child_id and comment models' relationship is leveraged when requesting a singular comment:
+
+```Python
+    stmt = db.select(Comment).where(Comment.child_id == id, Comment.comment_id == id2)
+```
+
+In this line, the database is queried for comments where the child_id value matches an id value submitted via the URI, essentially requesting a particular child's comments. The specific comment is then targeted via a URI input id2 which is compared to the comment's own primary key.
+
+```Python
+    comment_dict["user"]["id"] == user_id
+
+```
+
+Later in the same endpoint function, this line checks if the person who posted the returned comment is the user requesting the comment. If the user is not and admin, teacher or the user who posted the comment, the comment is not returned. These three models combine for specific and secure queries.
+
+Users also register contacts who represent a child's point of contact for a particular day. Contacts take the a user_id foreign key which links a registered contact to a user. When a user attempts to interact with a contact, their id is compared to the user_id attribute of the contact.
+
+The other models are the teacher and group entities which represent a teacher and their contact information and a class, it's name, teacher and meeting day respectively. When registering a group the admin user must provide a teacher id to link a teacher's name and their email to a group. This allows users to query to who their child's class' point of contact is.
+
+All models contribute to the attendances entity which describes a child, which class they attend and who their contact is on that day. A join table, the attendance model links a child instance (including it's registering user), a group instance (including its respective teacher), and a contact (also linking its registering user). By querying an attendance, a teacher is able to find out who a child's contact is for the day, if they are an emergency contact, which group the child is attending and who the group's teacher is. At a different endpoint, a parent is able to query their registered child, see a list of their registered attendances and confirm who their contact is set as on each day.
+
+## R8. Explain how to use this application’s API endpoints. Each endpoint should be explained, including the following data for each endpoint /6
+
+Identifies ALL of the application’s API endpoints, including (for each identified endpoint) the HTTP verb, route path, and any required body or header data, and includes examples of what each identified endpoint will return on success AND failure of that endpoint operation
 
 * HTTP verb
 * Path or route

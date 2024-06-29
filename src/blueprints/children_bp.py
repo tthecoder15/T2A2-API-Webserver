@@ -1,4 +1,5 @@
-"""Contains blueprint formatting and endpoints for "Children", "Comments" and "Attendances" entities.
+"""
+    Contains blueprint formatting and endpoints for "Child", "Comment" and "Attendance" entities.
 """
 
 from datetime import datetime
@@ -12,12 +13,14 @@ from init import db
 from auth import user_status
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-
+# Initialises flask Blueprint class "children_bp" and defines url prefix for endpoints defined in with @children_bp wrapper
 children_bp = Blueprint("child", __name__, url_prefix="/children")
 
 
 # READ Children
+# wrapper links function "get_children" to endpoint "/children" when request is made with GET method
 @children_bp.route("/", methods=["GET"])
+# mandates a JWT for requests to this endpoint
 @jwt_required()
 def get_children():
     """Returns multiple child tuples based on user permissions. Endpoint for "GET" "/children".
@@ -583,7 +586,7 @@ def post_comment(id):
         # Attempts to retrieve child instance with an "id" value matching input id or returns 404
         child = db.get_or_404(Child, id)
         # Checks if user's id equals the child instances "id" or returns 403 error
-        if child.id != user_id:
+        if child.user_id != user_id:
             return {"Error": "You are not authorised to access this resource"}, 403
 
     # Screens any provided comment values via the marshmallow schema
