@@ -266,7 +266,7 @@ All models contribute to the attendances entity which describes a child, which c
 
 ### Users
 
-LOGIN User
+#### LOGIN User
 
 * POST
 * /users/login
@@ -276,12 +276,12 @@ LOGIN User
 * Unsuccessful response: {"Error": "Incorrect email or password"}, 401
 
 ![Successful user login](docs/endpoint-ss/1-login-user-success.png)
-A successful login request.
+A successful POST login request.
 
 ![Unsuccessful user login](docs/endpoint-ss/1-login-user-unsuccess.png)
-An unsuccessful login request.
+An unsuccessful POST login request.
 
-GET Users
+#### GET Users
 
 * GET
 * /users
@@ -291,56 +291,180 @@ GET Users
 * Unsuccessful response: {"Error": "You are not authorised to access thie resource"}, 403
 
 ![Successful users request](docs/endpoint-ss/2-get-users-success.png)
-A successful users request.
+A successful GET users request.
 
 ![Unsuccessful users request](docs/endpoint-ss/2-get-users-unsuccess.png)
-An unsuccessful users request.
+An unsuccessful GET users request.
 
-CREATE User
+#### GET User
+
+* GET
+* /users/int
+* Required header: authorised JWT, user must be an admin or the user id must match the JWT id
+* Required body: None
+* Successful response: {user attributes: values}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+
+![Successful GET user](docs/endpoint-ss/2a-get-user-success.png)
+A successful GET user request.
+
+![Unsuccessful GET user](docs/endpoint-ss/2a-get-user-success.png)
+An unsuccessful GET user request.
+
+#### CREATE User as Admin
 
 * POST
-* /Users
-* Body: email, password, first_name
-* Response: Success: user created, 200/400
+* /users/admin
+* Required header: authorised JWT, user must be an admin
+* Required body: first_name, email, password, is_admin boolean, is_teacher boolean
+* Successful response: {"Success": registered user data}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "Email already registered. Please provide a unique email address"}, 400
+    3. {"Error": "Request is missing field: 'field_name'"}, 400
+    4. {"Error": "attribute: ["Not a valid attribute_name]"}, 400
+    5. {"Error": "first_name: ["Names must not contain numbers or special characters besides hyphens, apostrophes and spaces]"}, 400
 
-UPDATE User
+![Successful admin user post](docs/endpoint-ss/3-post-users-admin-success.png)
+A successful admin POST user request.
+
+![Unsuccessful admin user post](docs/endpoint-ss/3-post-users-admin-unsuccess.png)
+An unsuccessful admin POST user request.
+
+#### CREATE User without authorisation
+
+* POST
+* /users
+* Required header: None
+* Required body: first_name, email
+* Successful response: {"Success": registered user data, fields submitted}, 200
+* Unsuccessful responses:
+    1. {"Error": "Email already registered. Please provide a unique email address"}, 400
+    2. {"Error": "Request is missing field: 'field_name'"}, 400
+    3. {"Error": "attribute: ["Not a valid attribute_name]"}, 400
+    4. {"Error": "first_name: ["Names must not contain numbers or special characters besides hyphens, apostrophes and spaces]"}, 400
+
+![Successful unauthorised user post](docs/endpoint-ss/4-post-user-success.png)
+A successful unauthorised POST user request.
+
+![Unsuccessful unauthorised user post](docs/endpoint-ss/4-post-user-unsuccess.png)
+An unsuccessful unauthorised POST user request.
+
+#### UPDATE User
 
 * PATCH
-* /Users/<int:id>
-* JWT_Token JWT_Token where is_admin == True or get_JWT_identity == user.id
-* Body: email or password
-* Response: {Success: user updated, changed_field: new_value}, 200, 400, 401
+* /users/int
+* Required header: authorised JWT, user must be an admin or the user id must match the JWT id
+* Required body: one of first_name, email or password. If admin is_admin boolean, is_teacher boolean optional
+* Successful response: {"Updated fields": { attribute: updated_value}}, 200
+  * if password updated: "password": "Password successfully updated"
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "Email already registered. Please provide a unique email address"}, 400
+    3. {"Error": "Please provide at least one value to update"}, 400
+    4. {"Error": "attribute: ["Not a valid attribute_name]"}, 400
+    5. {"Error": "No resource found"}, 404
 
-DELETE User
+![Successful user PATCH](docs/endpoint-ss/5-patch-user-success.png)
+A successful user PATCH request.
+
+![Unsuccessful user PATCH](docs/endpoint-ss/5-patch-user-unsuccess.png)
+An usuccessful user PATCH request.
+
+#### DELETE User
 
 * DELETE
-* /Users/<int:id>
-* JWT_Token JWT_Token where is_admin == True
-* Response: Success: user deleted, 200/400, 401
+* /users/int
+* Required header: authorised JWT, user must be an admin
+* Required body: None
+* Successful response: {"Success": "User registration deleted"}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
 
-LOGIN User
+![Successful DELETE user](docs/endpoint-ss/6-delete-user-success.png)
+A successful DELETE user request.
 
-* POST
-* /Users
-* Body: email, password
-* Response: Access_token: token_id, 200/400
+![Unsuccessful DELETE user](docs/endpoint-ss/6-delete-user-unsuccess.png)
+An unsuccessful DELETE user request.
 
 ### Children
 
-GET Child/Children
+#### GET Children
 
 * GET
-* /Children OR /Children/<int:id>
-* JWT_Token where is_admin == True, is_teacher == False or children.user_id == get_JWT_identity
-* Response: first_name, last_name, 200/400, 401
+* /children
+* Required header: authorised JWT
+* Required body: None
+* Successful response: if the user is an admin, all child instances returned, if the user is a parent, only children whose user_id equals the JWT id are returned.
 
-CREATE Child
+Format: {[{"child": child_data}, {"child2": child2_data}]}, 200
+
+* Unsuccessful response: {"Error": "You are not authorised to access this resource"}, 403
+
+![Successful children request](docs/endpoint-ss/7-get-children-success.png)
+A successful GET children request.
+
+![Unsuccessful children request](docs/endpoint-ss/7-get-children-unsuccess.png)
+An unsuccessful GET children request.
+
+#### GET Child
+
+* GET
+* /children/int
+* Required header: authorised JWT, user must be an admin or the child's user_id must match the JWT id
+* Required body: None
+* Successful response: {child attributes: values}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+
+![Successful GET user](docs/endpoint-ss/8-get-child-success.png)
+A successful GET child request.
+
+![Unsuccessful GET user](docs/endpoint-ss/8-get-child-unsuccess.png)
+An unsuccessful GET child request.
+
+#### CREATE Child
 
 * POST
-* /Children
-* JWT_Token where is_admin == True, is_teacher == False
-* Body: first_name, last_name
-* Response: {Success: child registered, first_name, last_name}, 200/400, 401
+* /users/children
+* Required header: authorised JWT, user must be an admin or a parent
+* Required body: first_name, last_name. If admin, a user_id must be provided. If parent, user_id is automatically set to JWT id value
+* Successful response: {"Success": registered child data}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "This child is already registered to this user"}, 400
+    3. {"Error": "Request is missing field: 'field_name'"}, 400
+    4. {"Error": "attribute: ["Not a valid attribute_name]"}, 400
+    5. {"Error": "first/last_name: ["Names must not contain numbers or special characters besides hyphens, apostrophes and spaces]"}, 400
+
+![Successful admin child post](docs/endpoint-ss/9-post-child-success.png)
+A successful admin POST child request.
+
+![Unsuccessful admin child post](docs/endpoint-ss/9-post-child-unsuccess.png)
+An unsuccessful admin POST child request.
+
+#### UPDATE Child
+
+* PATCH
+* /child/int
+* Required header: authorised JWT, user must be an admin or the child's user_id must match the JWT id
+* Required body: one of first_name or last_name.
+* Successful response: {"Updated fields": { attribute: updated_value}}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "Please provide at least one value to update"}, 400
+    3. {"Error": "first/last_name: ["Names must not contain numbers or special characters besides hyphens, apostrophes and spaces]"}, 400
+    4. {"Error": "No resource found"}, 404
+
+![Successful user PATCH](docs/endpoint-ss/10-patch-child-success.png)
+A successful child PATCH request.
+
+![Unsuccessful user PATCH](docs/endpoint-ss/10-patch-child-unsuccess.png)
+An unsuccessful child PATCH request.
 
 DELETE Child
 
@@ -348,13 +472,6 @@ DELETE Child
 * /Children/<int:id>
 * JWT_Token where is_admin == True, or children.user_id == get_JWT_identity
 * Response: {Success: child deleted}
-
-UPDATE Child
-
-* PUT
-* /children/<int:id>
-* JWT_Token where is_admin == True, or children.user_id == get_JWT_identity
-* Response: {Success: data updated, field_updated: value}, 200/400, 401
 
 ### Comments
 
