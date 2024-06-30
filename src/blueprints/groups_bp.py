@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from models.group import Group, GroupSchema
 from init import db
-from auth import admin_check
+from auth import admin_check, user_status
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
@@ -13,13 +13,14 @@ groups_bp = Blueprint("group", __name__, url_prefix="/groups")
 @jwt_required()
 def get_groups():
     user_id = get_jwt_identity()
+    user_type = user_status(user_id)
 
-    if admin_check(user_id):
+    if user_type == "Admin" or user_type == "Teacher" or user_type == "Parent":
         stmt = db.select(Group)
         groups = db.session.scalars(stmt).all()
         return GroupSchema(many=True).dump(groups)
     else:
-        return{"Error": "You are not authorised to access this resource"}, 403 
+        return {"Error": "You are not authorised to access this resource"}, 403
 
 
 # READ Single Group
@@ -29,8 +30,9 @@ def get_group(id):
     group = db.get_or_404(Group, id)
     group_dict = GroupSchema().dump(group)
     user_id = get_jwt_identity()
+    user_type = user_status(user_id)
 
-    if admin_check(user_id):
+    if user_type == "Admin" or user_type == "Teacher" or user_type == "Parent":
         return group_dict
     else:
         return {"Error": "You are not authorised to access this resource"}, 403
@@ -95,6 +97,16 @@ def update_group(id):
         return {"Error": "Please provide at least one value to update"}, 400
 
     if admin_check(user_id):
+        stmt = db.select(Group).where(
+            Group.group_name == new_info["group_name"],
+            Group.day == new_info["day"],
+        )
+        group = db.session.scalar(stmt)
+        if group:
+            return {
+                "Error": "A group is already registered with this name and day"
+            }, 400
+
         group = db.get_or_404(Group, id)
         group.group_name = request.json.get("group_name", group.group_name).capitalize()
         group.day = request.json.get("day", group.day)

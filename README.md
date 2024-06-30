@@ -272,8 +272,12 @@ All models contribute to the attendances entity which describes a child, which c
 * /users/login
 * Required header: None
 * Required body: email, password
-* Successful response: {"token": "token_value"}, 200
-* Unsuccessful response: {"Error": "Incorrect email or password"}, 401
+* Successful response: {"token": token_value}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
+    4. {"Error": "Incorrect email or password"}, 401
 
 ![Successful user login](docs/endpoint-ss/1-login-user-success.png)
 A successful POST login request.
@@ -406,11 +410,11 @@ An unsuccessful DELETE user request.
 * /children
 * Required header: authorised JWT
 * Required body: None
-* Successful response: if the user is an admin, all child instances returned, if the user is a parent, only children whose user_id equals the JWT id are returned.
-
-Format: {[{"child": child_data}, {"child2": child2_data}]}, 200
-
-* Unsuccessful response: {"Error": "You are not authorised to access this resource"}, 403
+* Successful response: {[{child: child_data}, {child2: child2_data}]}, 200 - if the user is an admin, all child instances returned, if the user is a parent, only children whose user_id equals the JWT id are returned.
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
 
 ![Successful children request](docs/endpoint-ss/7-get-children-success.png)
 A successful GET children request.
@@ -503,7 +507,7 @@ An unsuccessful DELETE child request.
 * /children/int/comments
 * Required header: authorised JWT, user must be an admin or teacher or child user_id must match JWT id
 * Required body: None
-* Successful response: {"child_attributes": "values", "comments": [{"comment_attributes" : "attribute_values"}]}, 200 - a child and a list of all their comments and their data
+* Successful response: [{child_attributes: values, comments: [{comment_attributes : attribute_values}]}], 200 - a child and a list of all their comments and their data
 * Unsuccessful responses:
     1. {"Error": "You are not authorised to access this resource"}, 403
     2. {"Error": "No resource found"}, 404
@@ -538,7 +542,7 @@ An unsuccessful GET comment request.
 * POST
 * /children/id/comments
 * Required header: authorised JWT, user must be an admin or teacher or child user_id must match JWT id
-* Required body: "message", "urgency", , "child_id" is passed in URI
+* Required body: "message", "urgency", "child_id" is passed in URI
 * Successful response: {"Success": registered comment data}, 201
 * Unsuccessful responses:
     1. {"Error": "You are not authorised to access this resource"}, 403
@@ -789,60 +793,203 @@ An unsuccessful DELETE teacher request.
 
 ### Groups
 
-GET Group
+#### GET Groups
 
 * GET
-* /groups or groups/<int:id>
-* JWT_Token
-* Response: {name, teacher_id, day, teacher.first_name, teacher.email}, 200/400, 401
-
-CREATE Group
-
-* PUT
 * /groups
-* JWT_Token where is_admin == True
-* Body: {name, teacher_id, day}
-* Response: {Success: group created, {name, teacher_id, day}}, 200/400, 401
+* Required header: authorised JWT
+* Required body: None
+* Successful response: [{group_attributes: values}], 200 - a list containing all group instances and their attributes
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"msg": "Token has expired}, 401
 
-UPDATE Group
+![Successful GET groups request](docs/endpoint-ss/27-get-groups-success.png)
+A successful GET groups request.
+
+![Unsuccessful GET groups request](docs/endpoint-ss/27-get-groups-unsuccess.png)
+An unsuccessful GET groups request.
+
+#### GET Group
+
+* GET
+* /groups/int
+* Required header: authorised JWT
+* Required body: None
+* Successful response: {group_attributes: values}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
+
+![Successful GET group](docs/endpoint-ss/28-get-group-success.png)
+A successful GET group request.
+
+![Unsuccessful GET group](docs/endpoint-ss/23-get-group-unsuccess.png)
+An unsuccessful GET group request.
+
+#### POST Group
+
+* POST
+* /teachers
+* Required header: authorised JWT, user must be an admin
+* Required body: "group_name", "day" and "teacher_id" values
+* Successful response: {"Success": {group_attributes: values}}, 201
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "A group is already registered with this name and day"}, 400
+    3. {"Error": "Request is missing field: 'field_name'"}, 400
+    4. {"Error": "attribute: ["Not a valid attribute_name]"}, 400
+    5. {"Error": "group_name": ["Names must not contain numbers or special characters besides hyphens, apostrophes and spaces"]}, 400
+    6. {"Error": "day": ["Must be one of: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday."]}, 400
+    7. {"msg": "Token has expired}, 401
+
+![Successful group post](docs/endpoint-ss/29-post-post-success.png)
+A successful group POST request.
+
+![Unsuccessful group post](docs/endpoint-ss/29-post-group-unsuccess.png)
+An unsuccessful group POST request.
+
+#### PATCH Group
 
 * PATCH
-* /groups/<int:id>
-* JWT_Token where is_admin == True
-* Body: {field_update: new_value}
-* Response: {Success: group updated, updated_field: new_value}, 200/400, 401
+* /groups/int
+* Required header: authorised JWT, user must be an admin
+* Required body: one of "group_name", "day" and "teacher_id" values
+* Successful response: {"Updated fields": { attribute: updated_value}}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "Please provide at least one value to update"}, 400
+    3. {"Error": "A group is already registered with this name and day"}, 400
+    4. {"Error": "group_name": ["Names must not contain numbers or special characters besides hyphens, apostrophes and spaces"]}, 400
+    5. {"Error": "day": ["Must be one of: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday."]}, 400
+    6. {"Error": "No resource found"}, 404
+    7. {"msg": "Token has expired}, 401
+
+![Successful group PATCH](docs/endpoint-ss/30-patch-group-success.png)
+A successful group PATCH request.
+
+![Unsuccessful group PATCH](docs/endpoint-ss/30-patch-group-unsuccess.png)
+An unsuccessful group PATCH request.
+
+#### DELETE Group
+
+* DELETE
+* /teachers/int
+* Required header: authorised JWT, user must be an admin
+* Required body: None
+* Successful response: {"Success": "Group registration deleted"}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
+* NOTE: Deleting a teacher will delete any linked groups. Please update groups linked to a teacher before deleting a teacher if you want to preserve attendances and groups.
+
+![Successful DELETE group](docs/endpoint-ss/31-delete-group-success.png)
+A successful DELETE group request.
+
+![Unsuccessful DELETE group](docs/endpoint-ss/31-delete-group-unsuccess.png)
+An unsuccessful DELETE group request.
 
 ### Contacts
 
-GET Contact
+#### GET Contacts
 
 * GET
-* /contacts/<int:id>
-* JWT_Token where is_admin == True, is_teacher == True or contact.user_id == get_JWT_identity
-* Response: contact_id, first_name, ph_number, emergency_cont, email, 200/400, 401
+* /contacts
+* Required header: authorised JWT, user must be a parent or admin
+* Required body: None
+* Successful response: [{contact_attributes: values}], 200 - if the user is a parent, a list containing all contacts with a user_id value matching the JWT id, if the user is an admin, all registered contacts are returned
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"msg": "Token has expired}, 401
 
-CREATE Contact
+![Successful GET contacts request](docs/endpoint-ss/32-get-contacts-success.png)
+A successful GET contacts request.
+
+![Unsuccessful GET contacts request](docs/endpoint-ss/32-get-contacts-unsuccess.png)
+An unsuccessful GET contacts request.
+
+#### GET Contact
+
+* GET
+* /contacts/int
+* Required header: authorised JWT, user must be an admin or the contact's user_id must match the JWT id
+* Required body: None
+* Successful response: {contact attributes: values}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
+
+![Successful GET group](docs/endpoint-ss/33-get-contact-success.png)
+A successful GET contact request.
+
+![Unsuccessful GET contact](docs/endpoint-ss/33-get-contact-unsuccess.png)
+An unsuccessful GET contact request.
+
+#### POST Contact
 
 * POST
 * /contacts
-* JWT_Token where is_admin == True, is_teacher == False
-* Body: first_name, ph_number, emergency_cont, email (optional)
-* Response: {Success: contact registered, first_name, ph_number, emergency_cont, email}, 200/400, 401
+* Required header: authorised JWT, user must be an admin or a parent
+* Required body: "first_name", "emergency_contact", "ph_number". "email" value is optional. If admin, a user_id must be provided. If parent, user_id is automatically set to JWT id value
+* Successful response: {"Success": registered contact}, 201
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "A contact is already registered with this phone number"}, 400
+    3. {"Error": "Request is missing field: 'field_name'"}, 400
+    4. {"Error": "attribute: ["Not a valid attribute_name]"}, 400
+    5. {"Error": "first_name: ["Names must not contain numbers or special characters besides hyphens, apostrophes and spaces]"}, 400
+    6. {"Error": {"ph_number": ["Phone numbers must be 10 characters"]}}, 400
+    7. {"msg": "Token has expired}, 401
 
-UPDATE Contact
+![Successful contact post](docs/endpoint-ss/34-post-contact-success.png)
+A successful POST contact request.
+
+![Unsuccessful contact post](docs/endpoint-ss/34-post-contact-unsuccess.png)
+An unsuccessful POST contact request.
+
+#### PATCH Contact
 
 * PATCH
-* /contacts/<int:id>
-* JWT_Token where is_admin == True, or contact.user_id == get_JWT_identity
-* Body: updated_field: new_value
-* Response: {Success: contact updated, field_updated: new_value}, 200/400, 401
+* /contacts/int
+* Required header: authorised JWT, user must be an admin or the contact's user_id must match the JWT id
+* Required body: one of "first_name", "emergency_contact", "ph_number" or "email".
+* Successful response: {"Updated fields": { attribute: updated_value}}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "A contact is already registered with this phone number"}, 400
+    3. {"Error": "Request is missing field: 'field_name'"}, 400
+    4. {"Error": "attribute: ["Not a valid attribute_name]"}, 400
+    5. {"Error": "first_name: ["Names must not contain numbers or special characters besides hyphens, apostrophes and spaces]"}, 400
+    6. {"Error": {"ph_number": ["Phone numbers must be 10 characters"]}}, 400
+    7. {"msg": "Token has expired}, 401
+    8. {"Error": "Please provide at least one value to update"}, 400
 
-DELETE Contact
+![Successful contact PATCH](docs/endpoint-ss/35-patch-contact-success.png)
+A successful contact PATCH request.
+
+![Unsuccessful contact PATCH](docs/endpoint-ss/35-patch-contact-unsuccess.png)
+An unsuccessful contact PATCH request.
+
+#### DELETE Contact
 
 * DELETE
-* /contacts/<int:id>
-* JWT_Token where is_admin == True, or contact.user_id == get_JWT_identity
-* Response: {Success: contact deleted}, 200/400, 401
+* /contacts/int
+* Required header: authorised JWT, user must be an admin or contact's "user_id" must match JWT id
+* Required body: None
+* Successful response: {"Success": "Contact registration deleted"}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
+
+![Successful DELETE contact](docs/endpoint-ss/36-delete-contact-success.png)
+A successful DELETE contact request.
+
+![Unsuccessful DELETE contact](docs/endpoint-ss/36-delete-contact-unsuccess.png)
+An unsuccessful DELETE contact request.
 
 ## Additional Notes
 

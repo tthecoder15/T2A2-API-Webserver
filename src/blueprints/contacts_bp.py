@@ -16,14 +16,26 @@ contacts_bp = Blueprint("contact", __name__, url_prefix="/contacts")
 # wrapper links function "get_contacts" to endpoint "/contacts" when request is made with GET method
 @contacts_bp.route("/", methods=["GET"])
 @jwt_required()
-def get_contacts():
-
+def get_contacts():   
     user_id = get_jwt_identity()
+    # Creates local variable storing "Admin", "Parent" or "Teacher" for later permission checks
+    user_type = user_status(user_id)
 
-    if admin_check(user_id):
+    # If user is an "Admin", a database query selecting all "contact" instances is submitted
+    # Returned SQLAlchemy objects are converted to dictionaries via marshmallow and returned to the user
+    if user_type == "Admin":
         stmt = db.select(Contact)
         contacts = db.session.scalars(stmt).all()
         return ContactSchema(many=True).dump(contacts)
+
+    # If user is a "Parent", a database query selecting all "contact" instances with a matching "user_id" is submitted
+    # Returned SQLAlchemy objects are converted to dictionaries via marshmallow and returned to the user
+    if user_type == "Parent":
+        stmt = db.select(Contact).where(Contact.user_id == user_id)
+        registered_contacts = db.session.scalars(stmt).all()
+        return ContactSchema(many=True).dump(registered_contacts)
+
+    # If the user is not an "Admin" or "Parent" an error message is returned
     else:
         return {"Error": "You are not authorised to access this resource"}, 403
 
@@ -31,12 +43,19 @@ def get_contacts():
 @contacts_bp.route("/<int:id>", methods=["GET"])
 @jwt_required()
 def get_contact(id):
+    # The database is queried for a "contact" instance with an "id" value matching the submitted URI value
+    # If no matches are found, a 404 error is raised
     contact = db.get_or_404(Contact, id)
+    # A returned SQLAlchemy object is converted to a dictionary via marshmallow
     contact_dict = ContactSchema().dump(contact)
     user_id = get_jwt_identity()
-
-    if admin_check(user_id):
+    # Creates local variable storing "Admin", "Parent" or "Teacher" for later permission checks
+    user_type = user_status(user_id)
+    # If the user is an "Admin", the dictionary is returned
+    # If the user is not an "Admin", the dictionary's "user_id" value is compared to the user_id provided in the JWT
+    if user_type == "Admin" or contact_dict["user_id"] == user_id:
         return contact_dict
+    # If the user is not an "Admin" or their JWT id does not match the requested contact, an error is returned
     else:
         return {"Error": "You are not authorised to access this resource"}, 403
 
