@@ -9,6 +9,21 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 users_bp = Blueprint("user", __name__, url_prefix="/users")
 
+# LOGIN
+@users_bp.route("/login", methods=["POST"])
+def login():
+    if len(request.json["password"]) < 8:
+        return {"Error": "Incorrect email or password"}, 400
+    params = UserSchema(only=["email", "password"]).load(
+        request.json, unknown="exclude"
+    )
+    stmt = db.select(User).where(User.email == params["email"])
+    user = db.session.scalar(stmt)
+    if user and bcrypt.check_password_hash(user.password, params["password"]):
+        token = create_access_token(identity=user.id, expires_delta=timedelta(hours=2))
+        return {"token": token}
+    else:
+        return {"Error": "Incorrect email or password"}, 401
 
 # READ All User
 @users_bp.route("/", methods=["GET"])
@@ -38,24 +53,6 @@ def get_user(id):
             return UserSchema(exclude=["password", "is_admin", "is_teacher"]).dump(user)
         else:
             return {"Error": "You are not authorised to access this resource"}, 403
-
-
-# LOGIN
-@users_bp.route("/signin", methods=["POST"])
-def login():
-    if len(request.json["password"]) < 8:
-        return {"Error": "Incorrect email or password"}, 400
-    params = UserSchema(only=["email", "password"]).load(
-        request.json, unknown="exclude"
-    )
-    stmt = db.select(User).where(User.email == params["email"])
-    user = db.session.scalar(stmt)
-    if user and bcrypt.check_password_hash(user.password, params["password"]):
-        token = create_access_token(identity=user.id, expires_delta=timedelta(hours=2))
-        return {"token": token}
-    else:
-        return {"Error": "Incorrect email or password"}, 403
-
 
 # Create User, admin auth
 @users_bp.route("/admin", methods=["POST"])

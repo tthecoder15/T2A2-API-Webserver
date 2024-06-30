@@ -257,7 +257,7 @@ All models contribute to the attendances entity which describes a child, which c
 
 ## R8. Explain how to use this application’s API endpoints. Each endpoint should be explained, including the following data for each endpoint /6
 
-Identifies ALL of the application’s API endpoints, including (for each identified endpoint) the HTTP verb, route path, and any required body or header data, and includes examples of what each identified endpoint will return on success AND failure of that endpoint operation
+* Identifies ALL of the application’s API endpoints, including (for each identified endpoint) the HTTP verb, route path, and any required body or header data, and includes examples of what each identified endpoint will return on success AND failure of that endpoint operation
 
 * HTTP verb
 * Path or route
@@ -266,12 +266,35 @@ Identifies ALL of the application’s API endpoints, including (for each identif
 
 ### Users
 
-GET User
+LOGIN User
+
+* POST
+* /users/login
+* Required header: None
+* Required body: email, password
+* Successful response: {"token": "token_value"}, 200
+* Unsuccessful response: {"Error": "Incorrect email or password"}, 401
+
+![Successful user login](docs/endpoint-ss/1-login-user-success.png)
+A successful login request.
+
+![Unsuccessful user login](docs/endpoint-ss/1-login-user-unsuccess.png)
+An unsuccessful login request.
+
+GET Users
 
 * GET
-* /Users OR /Users/<int:id>
-* JWT_Token where is_admin == True
-* Response: user_id, email, first_name, is_admin, is_teacher, 200/400, 401
+* /users
+* Required header: authorised JWT, user must be an admin
+* Required body: None
+* Successful response: {["users": user_data]}, 200 - a list of all users and their data including registered children, contacts and attendances
+* Unsuccessful response: {"Error": "You are not authorised to access thie resource"}, 403
+
+![Successful users request](docs/endpoint-ss/2-get-users-success.png)
+A successful users request.
+
+![Unsuccessful users request](docs/endpoint-ss/2-get-users-unsuccess.png)
+An unsuccessful users request.
 
 CREATE User
 
@@ -493,3 +516,13 @@ DELETE Attendance
 * /children/attendances/<int:id>
 * JWT_Token where is_admin == True, or child.user_id == get_JWT_identity
 * Response: {Success: attendance deleted}, 200/400, 401
+
+## Additional Notes
+
+Code comment is formatted according to the Pep 8 style guide and Pep 257 docstring conventions.
+
+### References
+
+Coghlan, A., Rossum, G. v., Warsaw, B.  (2013) _[PEP 8 – Style Guide for Python Code](https://peps.python.org/pep-0008/)_, Python.org website, accessed 29 June 2024.
+
+Goodger, D. Rossum, G. v.  (2001) _[PEP 257 – Docstring Conventions](https://peps.python.org/pep-0257/)_, Python.org website, accessed 29 June 2024.
