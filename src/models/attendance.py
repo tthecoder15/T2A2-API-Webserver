@@ -1,8 +1,7 @@
-from datetime import date
-from init import db, ma
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Text, String, ForeignKey, Date
+from sqlalchemy import ForeignKey
 from marshmallow import fields
+from init import db, ma
 
 
 class Attendance(db.Model):
@@ -20,11 +19,14 @@ class Attendance(db.Model):
 
 
 class AttendanceSchema(ma.Schema):
-    
-    child = fields.Nested("ChildSchema", only=["id", "user_id", "first_name", "last_name"], exclude=["attendances"])
+
+    child = fields.Nested(
+        "ChildSchema",
+        only=["id", "user_id", "first_name", "last_name"],
+        exclude=["attendances"],
+    )
     group = fields.Nested("GroupSchema", only=["group_name", "day"])
     contact = fields.Nested("ContactSchema", exclude=["attendances"])
-
 
     class Meta:
         ordered = True
