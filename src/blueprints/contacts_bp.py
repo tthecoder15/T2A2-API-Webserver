@@ -24,9 +24,9 @@ def get_contacts():
     user_id = get_jwt_identity()
     # Creates local variable storing "Admin", "Parent" or "Teacher" for later permission checks
     user_type = user_status(user_id)
-    # If user is an "Admin", a database query selecting all "contact" instances is submitted
+    # If user is an "Admin" or "Teacher", a database query selecting all "contact" instances is submitted
     # Returned SQLAlchemy objects are converted to dictionaries via marshmallow and returned to the user
-    if user_type == "Admin":
+    if user_type == "Admin" or user_type == "Teacher":
         stmt = db.select(Contact)
         contacts = db.session.scalars(stmt).all()
         return ContactSchema(many=True).dump(contacts)
@@ -57,9 +57,13 @@ def get_contact(id):
     # Creates local variable storing "Admin", "Parent" or "Teacher" for later permission checks
     user_type = user_status(user_id)
 
-    # If the user is an "Admin", the dictionary is returned
-    # If the user is not an "Admin", the dictionary's "user_id" value is compared to the user_id provided in the JWT
-    if user_type == "Admin" or contact_dict["user_id"] == user_id:
+    # If the user is an "Admin" or "Teacher", the dictionary is returned
+    # If the user is not an "Admin" or "Teacher", the dictionary's "user_id" value is compared to the user_id provided in the JWT
+    if (
+        user_type == "Admin"
+        or user_type == "Teacher"
+        or contact_dict["user_id"] == user_id
+    ):
         return contact_dict
     # If the user is not an "Admin" or their JWT id does not match the requested contact, an error is returned
     else:

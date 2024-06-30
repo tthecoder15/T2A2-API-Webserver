@@ -1,30 +1,32 @@
-# T2A2-API-Webserver
+# T2A2-API-Webserver Classtracker API
 
-This is a repository for my API Webserver Project.
+This is a repository for my API Webserver Project: the Classtracker API.
 
 ## R1. Explain the problem that this app will solve, and explain how this app solves or addresses the problem /6
 
-When running a service that involves looking after children, such as an after school care or class, it is vital that teachers and parents can contact eachother timely and easily. Children may become unwell or injured, or parents might simply want to stay informed about what activities their child is completing. However, a child's living situation or contact can change week-to-week or on certain days and it is difficult for businesses to have real-time knowledge on this information. For example, a child may have their parent pick them up on a Wednesday whilst a grandparent may pick them up on a Thursday.For these reasons, it is beneficial to have a centralised database that can ease teacher communication with parents and deliver up-to-date information to both sides.
+When running a service that involves looking after children, such as an after school care service or class, it is vital that teachers and parents can contact eachother timely and easily. Children may become unwell or injured, or parents might simply want to stay informed about what activities their child is completing. However, a child's living situation or contact can change week-to-week or on certain days and it is difficult for businesses to have real-time knowledge on this information. For example, a child may have their parent pick them up on a Wednesday whilst a grandparent may pick them up on a Thursday. For these reasons, it is beneficial to have a centralised database that can ease teacher communication with parents and deliver up-to-date information to both sides.
 
-Currently, there exist many popular apps and services for childcare businesses such as [OWNA](https://www.owna.com.au/features/childcare-communication-app.aspx) and [Xap](https://xap.net.au/childcare-parent-engagement-app-software/) which enable messaging and posts between staff and parents as well as contact information services. These apps are effective tools, however, aside from reduced functionality free versions, these products are also expensive. OWNA charges [$99 per month](https://www.owna.com.au/pricing.aspx) whilst Xap charges [$149 per month](https://xap.net.au/pricing/) to use their services. In addition, these services are delivered as complete applications, meaning they cannot be integrated into a separate website or service and also establishing product dependence from businesses.
+Currently, there exist many popular apps and services for childcare businesses such as [OWNA](https://www.owna.com.au/features/childcare-communication-app.aspx) (OWNA a, n.d.)and [Xap](https://xap.net.au/childcare-parent-engagement-app-software/) (XAP a, n.d.) which enable messaging and posts between staff and parents and either side to access neccessary contact information. These apps are effective tools, however, aside from reduced functionality free versions, these products are also expensive. OWNA charges [$99 per month](https://www.owna.com.au/pricing.aspx) (OWNA b, n.d.) whilst Xap charges [$149 per month](https://xap.net.au/pricing/) (XAP b, n.d.) to use their services. In addition, these services are delivered as complete applications, meaning they cannot be integrated into a separate website or app.
 
-Finally, data privacy is a serious concern for small businesses who are typically preoccupied with day-to-day operations. For this reason, the API collects and stores a minimal data about children and carers alike.
+Finally, data privacy is a serious concern for small businesses who are typically preoccupied with day-to-day operations. These companies must track a certain amount of customer and children data but many applications demand extensive amounts of private data that is risky to store.
 
-This API incorporates multiple measures to solve these issues. Functionally, the API allows businesses to securely store minimalistic but essential data about the children in their care and their contacts' information. A teacher user is able to access a child's designated carer so they can contact the appropriate person. The API also features a comment functionality that allows a teacher to post about children for records purposes and to communicate with parents. From the parent's side, parents receive a user account which allows them to add multiple contacts and designate who is the active carer on a particular day. Because the circumstances around contacting a carer change, a parent can also control whether an active contact should be overriden from receiving sensitive communications. Also, comments about a child can only be accessed from a user account meaning that temporary contacts cannot and do not have to engage with them.
+This API strives to fix these issues. The API features a comment functionality that allows teachers and parents to exchange comments about children who attend the business or service. Vitally, parents cannot comment on children not registered to them.
+
+In addition, parental users can register for an account which allows them to add multiple contacts and children. The parent can then register attendances which describe which child is attending which class and who their contact is on that particular day. Because the circumstances around contacting a carer vary, a parent can also designate whether that contact should be called in an emergency.
+
+At a privacy level, the API attempts to minimise the amount of data required to function so that the database is less vulnerable to hacking.
 
 This API provides a free alternative to expensive competitors and, being published as source code, allows businesses to integrate it into their own websites as well.
 
 #### References
 
-[Xplor Education expensive reviews](https://www.getapp.com/education-childcare-software/a/xplor/pricing/)
+OWNA a (n.d.) _[Connect, Communicate & Collaborate](https://www.owna.com.au/features/childcare-communication-app.aspx)_, OWNA website, accessed 17 June 2024.
 
-[OWNA features](https://www.owna.com.au/features/childcare-communication-app.aspx)
+OWNA b (n.d.) _[Pricing](https://www.owna.com.au/pricing.aspx)_, OWNA website, accessed 17 June 2024.
 
-[Xap features](https://xap.net.au/childcare-parent-engagement-app-software/)
+XAP a (n.d.) _[Brighten Their Day. Bolster Your Brand. Make Parents Love You.](https://xap.net.au/childcare-parent-engagement-app-software/)_, XAP website, accessed 17 June 2024.
 
-[OWNA pricing](https://www.owna.com.au/pricing.aspx)
-
-[Xap pricing](https://xap.net.au/pricing/)
+XAP b (n.d.) _[Choose the best plan for you. No upfront payment.](https://xap.net.au/pricing/)_, XAP website, accessed 17 June 2024.
 
 ## R2. Describe the way tasks are allocated and tracked in your project /6
 
@@ -74,45 +76,45 @@ Brede Moe, N., Dingsøyr, T., Dyba, T. (2014) 'Agile Project Management', in Ruh
 
 ### Flask==3.0.3
 
-Flask is a web framework package that provides the tools and templates used to define endpoints, link them to appropriate functions and handle their request bodies, allowing the app to be run on a server. Flask contains methods and decorators which a developer calls in the app's modules to interact with the user's requests, effectively abstracting the routing and connection coding to behind-the-scenes. Built into Flask are error definitions that expand on Pythonic errors and describe the required behaviour for a route or function to work as intended. In addition, Flask contains an errorhandler wrapper that allows a developer to customise the response messages that a user receives for clarity.
+Flask is a web framework package that provides the tools and templates used to define endpoints, link them to appropriate functions and handle submitted requests. Essentially, aiding the process of creating an app that can be run on a server. Flask contains methods and decorators which a developer calls in the app's modules to interact with the user's requests, abstracting the routing and connection coding to behind-the-scenes. Built into Flask are error definitions that expand on Pythonic errors and describe the required behaviour for a route or function to work as intended. In addition, Flask contains an errorhandler wrapper that allows a developer to customise the response messages that a user receives for clarity.
 
 ### SQLAlchemy==2.0.31
 
-SQLAlchemy is an Object Relational Mapper (ORM) used to generate models which mirror the data structure of a relational database (described in more detail in question 5). Within the app, SQLAlchemy provides Python classes which are used to create inheriting classes which describe the data structures of a connected PostgreSQL database table. Other classes are provided in the package to attribute values including data types and functionality such as default values which are automatically passed to the database if no user input is provided for a particular field.
+SQLAlchemy is an Object Relational Mapper (ORM) used to generate models which mirror the data structure of a relational database (described in more detail in question 5). SQLAlchemy provides classes which are used to define the datatypes and attributes of a class which can then be filled with data and submitted to a relational database for storage. SQLAlchemy also provides templates for generating SQL queries based on these models.
 
 ### marshmallow==3.21.3
 
-Marshmallow is a library which provides methods to convert foreign object types to Python data types. Within the app, marshmallow converts SQLAlchemy objects to Python dictionaries. Marshmallow's provided classes are used to create schema's which, similar to SQLAlchemy models, mirror the data stored in a connected relational database so that attributes and values can be returned as key pairs. These schemas are utilised between the SQLAlchemy requests and returns and the application itself, filtering the user's inputs and responses. For example, marshmallow's built in validators can raise an error if a user enters a string for an email address that does not conclude the "@domain.com" format or if an integer field is passed a string. Similarly, marshmallow schemas filter returned data within the app, removing some fields from the dictionary that is returned to a user such a password value for a GET user request.
+Marshmallow is a library which provides methods to convert foreign object types to Python data types. Within the app, marshmallow converts SQLAlchemy objects to Python dictionaries. Marshmallow's provided classes are used to create schema's which, similar to SQLAlchemy models, mirror the data stored in a connected relational database so that attributes and values can be returned as key pairs. These schemas are utilised between the SQLAlchemy requests and returns and the application itself, filtering the user's inputs and responses. For example, marshmallow's built in validators can raise an error if a user enters a string for an email address that does not conclude with a "@domain.com" format or if an integer field is passed a string. Similarly, marshmallow schemas filter returned data within the app, removing inappropriate fields from the returned dictionary so a user cannot see them such as a "password" value for a GET user account request.
 
 #### Flask-JWT-Extended
 
-Flask-JWT-Extended is a pip package used to generate JWTs (JSON Web Tokens). JWTs are generated strings which contain data in three parts: the header, payload and signature. The header is the section of a JWT that describes which algorithm the token was generated with whilst the payload describes values included in the token such as how long the token should be considered validated and any optional data included in a key pair. The signature confirms which system issued the token and considers a secret key, passed when generating the key, the values in the payload and the formatting described in the header. Whilst data in a JWT's header and payload can be deciphered, the secret key is not revealed in the token itself meaning that a duplicate signature cannot be forged and proving the token came from a trusted source. In this app, Flask-JWT-Extended generates tokens when users log in and authenticates them when requests are made to the various endpoints, ensuring users can only access appropriate resources.
+Flask-JWT-Extended is a pip package used to generate JWTs (JSON Web Tokens). JWTs are generated strings which contain data in three parts: the header, payload and signature. The header is the section of a JWT that describes which algorithm the token was generated with whilst the payload describes values included in the token such as how long the token should be considered validated and any optional data included in a key pair. The signature confirms which system issued the token and considers a secret key, passed when generating the key, the values in the payload and the formatting described in the header. Whilst data in a JWT's header and payload can be deciphered, the secret key is not revealed in the token itself meaning that a duplicate signature cannot be forged, proving the token came from a trusted source. In this app, Flask-JWT-Extended generates tokens when users log in and authenticates them when requests are made to the various endpoints, ensuring users can only access appropriate resources.
 
 #### bcrypt==4.1.3
 
-Bcrypt is a dependency within the app used to hash user passwords so that they can be stored in the database in a non-plain text format. Within the app, a bcrypt instance is first initialised which containts various methods for creating and interpreting hashed passwords. Hashing generates a fixed length but unpredictable string which masks the input string. The returned hash can be recreated using the same hashing function on the same input string but, because hashed values are always the same length, an infinite number of strings can generate the same hashed value. To login in this app and generate a JWT, a user passes a request containing a password string, it is then passed through the hashing method and compared to the stored, already-hashed password recorded and compared. If they have equal values, the user is returned a JWT.
+Bcrypt is a dependency within the app used to hash user passwords so that they can be stored in the database in a non-plain text format. Within the app, a bcrypt instance is first initialised which contains various methods for creating and interpreting hashed passwords. Hashing generates a fixed length but unpredictable string which masks the input string. The returned hash can be recreated using the same hashing function on the same input string but, because hashed values are always the same length, an infinite number of strings can also generate the same hashed value. To login on this app and generate a JWT, a user passes a request containing a password string, it is then passed through the hashing method and compared to the stored, already-hashed password recorded and compared. If they have equal values, the user is returned a JWT.
 
 ### psycopg2-binary==2.9.9
 
-Pyscopg2-binary is utilised in the app for connecting the application to a local PostgreSQL database. Psycopg2 creates the route string which is passed to Flask that designates which socket the database will be hosted at and includes the app's PostgreSQL authentication for exchanges with the database including user name and password. Psycopg2 is responsible for actually sending the data, generated using SQLAlchemy, to the database.
+Pyscopg2-binary is utilised in the app for connecting the application to a local PostgreSQL database. Psycopg2 creates the route string which is passed to Flask that designates which socket the database will be hosted at and includes the app's PostgreSQL authentication for exchanges with the database including user name and password. Psycopg2 is responsible for communicating with the relational database, retrieving instances and sending generated  SQLAlchemy objects for storage.
 
 ### python-dotenv==1.0.1
 
-Python-dotenv allows the application to access data stored in ".env" files. In this app, the JWT secret key value is stored in the env file so that it can remain hidden and generated locally when the app is cloned. It also stores the psycopg routing string to hide it from users.
+Python-dotenv allows the application to access data stored in ".env" files. In this app, the JWT secret key value is stored in the env file so that it can remain hidden. A user must generate their own .env file and JWT token value when cloning the app. It also stores the psycopg routing string to hide it from users.
 
 ## R4. Explain the benefits and drawbacks of this app’s underlying database system /6
 
-This app uses a PostgreSQL (Postgres) database, connected via psycopg2 to store data in a relational manner. PostgreSQL is a robust, open-source database that is freely accessible on all major operating systems. This is a key benefit for this application as it means that users can initialise this API on their systems without assuming overhead costs altering their hardware or gaining access to the prescribed database software.
+This app uses a PostgreSQL (Postgres) database, connected via psycopg2 to store data in a relational manner. PostgreSQL is a robust, open-source database that is freely accessible on all major operating systems. This is a key benefit for this application as it means that users can initialise this API on their systems without assuming overhead costs altering their hardware or gaining access to the database software.
 
 In addition, when choosing a database for this application, PostgreSQL is a favourable choice due to its prominence in back-end development. Flask, SQLAlchemy and psycopg2 are highly developed packages which work seamlessly with Postgres databases. These packages were key to the app's development. To initialise this API, users simply have to install the app's dependencies, create a PostgreSQL database, link it to the app and run Flask. The default install of Postgres contains all neccessary features required.
 
 PostgreSQL is also ACID (Atomicity, Consistency, Isolation, Durability) compliant meaning that connection errors will not corrupt the database records as they existed (PostgreSQL Documentation, n.d.). ACID compliance is key for APIs where users may lose connectivity with the database due to servers failing.
 
-One drawback of using PostgreSQL for this app's database is that Postgres databases cannot be stored on the cloud. Postgres does not contain functionality to host databases on the cloud and, instead, a service such as Google's "Cloud SQL" by would be required for online storage. Notably, these services can mirror the functionality of a local Postgres database and could be utilised without much configuration required if the app's database needed to be stored remotely (Google Cloud, 2024).
+One drawback of using PostgreSQL for this app's database is that Postgres databases cannot be stored on the cloud. Postgres does not contain functionality to host databases on the cloud and, instead, a service such as Google's "Cloud SQL" would be required for online storage. Notably, these services can mirror the functionality of a local Postgres database and could be utilised without much configuration if the app's database needed to be stored remotely (Google Cloud, 2024).
 
-Another main drawback of Postgres is its speed and resource intensiveness. If this app were adopted and scaled widely, it would require a relatively powerful server to host it with good performance. By extension, query speeds will likely be slower than if the app were built on, key competitor, MySQL, a persistent critique of Postgres (Amazon Web Services, 2024).
+Another main drawback of Postgres is its speed and resource intensiveness. If this app were adopted and scaled widely, it would require a relatively powerful server to host it with good performance. By extension, query speeds will likely be slower than if the app were built on a  key competitor such as MySQL, a persistent critique of Postgres (Amazon Web Services, 2024).
 
-Notably, using an ORM mitigates some of the traditional drawbacks of Postgres such as its strict semantics and difficult syntax. This app's endpoints and error handling attempts to mitigate the confusing elements of querying and recording data to a Postgres database. Similarly, using the models and endpoints within this app may make it easier to migrate data if the database used needed to be moved, a typical challenge of Postgres (Hanlon et al., 2011).
+Notably, using an ORM mitigates some of the traditional drawbacks of Postgres such as its strict semantics and difficult syntax. The app's endpoints and error handling attempts to mitigate the confusing elements of querying and recording data to a Postgres database. Similarly, using the models and endpoints within this app may make it easier to migrate data if the database used needed to be moved, a typical challenge of Postgres (Hanlon et al., 2011).
 
 ### References
 
@@ -126,9 +128,9 @@ PostgreSQL Documentation (n.d.) _[About](https://www.postgresql.org/about)_, Pos
 
 ## R5. Explain the features, purpose and functionalities of the object-relational mapping system (ORM) used in this app /6
 
-Object relational models (ORMs) are software packages that ease the conversion of code from one coding language into another language to interact with a relational database. In this application, SQLAlchemy is used to convert Python code to SQL for interaction with a PostgreSQL database. Using SQLAlchemy classes, the app contains models to create Pythonic objects that mirror entities stored in a connected relational database. This allows for object-oriented programming on the Pythonic side (Abba, 2022). Returned objects from the database are then interacted-with and sometimes altered, reformatted into SQL and sent for long-term storage in the connected database. Long-term storage is a particular advantage granted by ORMs and database storage as, otherwise, a Python application may not be able to preserve state between the app being started, closed and reopened (GeeksforGeeks, 2024).
+Object relational models (ORMs) are software packages that ease the conversion of code from one coding language into another language to interact with a relational database. In this application, SQLAlchemy is used to convert Python code to SQL. Using SQLAlchemy classes, the app contains models to create Pythonic objects that mirror entities stored in the connected database. This allows for object-oriented programming on the Pythonic side (Abba, 2022). Returned objects from the database are then interacted with and sometimes altered before being reformatted into SQL and sent for long-term storage in the database. Long-term storage is a particular advantage granted by ORMs, otherwise, a Python application may not be able to preserve state between the app being started, closed and reopened (GeeksforGeeks, 2024).
 
-The app uses SQLAlchemy's provided classes and methods to mirror the entities in a connected database. The following is an example of the "User" model built to interact with a "users" table in a connected relational database:
+The app uses SQLAlchemy's provided classes and methods to mirror the entities in the connected database. The following is an example of the "User" model built to interact with a "users" table in a connected relational database:
 
 ```Python
     class User(db.Model):
@@ -154,7 +156,7 @@ The app uses SQLAlchemy's provided classes and methods to mirror the entities in
 
 ```
 
-Each model in the app uses an SQLAlchemy instance, "db", that contains SQLAlchemy's methods for converting Pythonic data structures to SQL formatting. The User class uses these to describe each attribute stored in the "users" table and its data quality. In the above model, id is an integer that represents the primary key for "user" instances, email, password and first_name are all strings with a maximum length of 200 and is_admin and is_teacher are boolean values. As seen above, the model can also describe default values so that, if the model is used to record an instance in the database and no value is provided for the attribute, the default is used. The attributes "children", "comments" and "contacts" all represent seperate entities that are linked with the "users" table via foreign key. The ORM associates these foreign tables with the "User" model so that joined results can be returned when the Python application communicates with the database.
+Each model in the app uses an SQLAlchemy instance, "db", that contains SQLAlchemy's methods for converting Pythonic data structures to SQL formatting. The User class inherits these methods and uses them to describe each attribute stored in the "users" table and their respective data qualities. In the above model, id is an integer that represents the primary key for "user" instances whilst "email", "password" and "first_name" are all defined as strings with a maximum length of 200. "is_admin" and "is_teacher" defined as boolean values. As seen above, the model can also describe default values so that, if the model is used to record an instance in the database and no value is provided for the attribute, the default is used. The attributes "children", "comments" and "contacts" all represent seperate entities that are linked with the "users" table via foreign key. The ORM associates these foreign tables with the "User" model so that joined results can be returned when the Python application communicates with the database.
 
 Another key feature of the ORM is its ability to craft complex SQL queries using simple Pythonic code.
 
@@ -163,7 +165,7 @@ Another key feature of the ORM is its ability to craft complex SQL queries using
         user = db.session.scalar(stmt)
 ```
 
-The stmt variable uses SQLAlchemy's methods (called from the db object) to generate a query statement. The statement generates a query requesting each of the values noted in the "User" and specifies the condition that the "id" value must equal the "user_id" value passed in a request body. The generated statement is this:
+In the above example, the stmt variable uses SQLAlchemy's methods (called from the db object) to generate a query statement. This statement requests every value in the "User" model and specifies the condition that the "id" value must equal the "user_id" value passed in a request body. The generated SQL statement is this:
 
 ```SQL
     SELECT users.id, users.email, users.password, users.first_name, users.is_admin, users.is_teacher 
@@ -171,9 +173,9 @@ The stmt variable uses SQLAlchemy's methods (called from the db object) to gener
     WHERE users.id = :id_1
 ```
 
-This statement is then passed to the database using the db.session.scalar() method which returns any matched instances as a scalar object. These scalars can then be interacted with in the application.
+This statement is then passed to the database using the db.session.scalar() method which returns any matched instances as a scalar object. These scalars can then be converted to a Python object in the application.
 
-Vitally, ORMs allow for simplified interaction between distinct coding languages such as Python and SQL. In this application, SQLAlchemy facilitates the conversion of Python data structures to SQL formatted code and objects. Without an ORM, the app would require its own unique code for mirroring the data structures in the connection database for any communication between the software. In addition, the ORMs robust structure and formatting provides some security measures as the SQL statement generation is abstracted away from the app's modules (GeeksforGeeks, 2024).
+Vitally, ORMs allow for simplified interaction between distinct coding languages such as Python and SQL. In this application, SQLAlchemy facilitates the conversion of Python data structures to SQL formatted code and objects. Without an ORM, the app would require its own unique code for generating SQL statements and mirroring the entities on the Python side. The ORMs robust structure and formatting also provides some security advantages as the SQL statement generation is abstracted away from the app's core functions, reducing the risk of SQL injection (GeeksforGeeks, 2024).
 
 ### References
 
@@ -186,28 +188,28 @@ GeeksforGeeks (2024) _[What is Object-Relational Mapping (ORM) in DBMS?](https:/
 ### This should focus on the database design BEFORE coding has begun, eg. during the project planning or design phase
 
 ![ERD Diagram](docs/API-ERD-V1.0.png)
-The ERD Diagram for this API, created using Crow's Foot Notation (Abba, 2022). The entities recorded in the API's database are Users, Children, Comments, Teachers, Contacts, Groups and Attendances.
+The initial ERD Diagram designed for the Childtracker API, created using Crow's Foot Notation (Abba, 2022). The entities recorded in the API's database are Users, Children, Comments, Teachers, Contacts, Groups and Attendances.
 
 ![Updated ERD Diagram](docs/API-ERD-V1.1.png)
-Updated diagram to include "comment_edited" and "date_edited" value.
+An updated diagram to include "comment_edited" and "date_edited" values. Useful for tracking if a comment was edited.
 
-Users are the central entity in the database as they grant parents, admin and teachers the ability to interact with the API. The User table's primary key is an ID and each instance also stores an email, password, first name and two booleans describing the type of account. Only the user's first name is stored in an effort to preserve privacy. The first name is required to identify a user's comment. When interacting with the API, users must first log in and receive a JWT which will then grant them access to different route functionality based on their admin and teacher status.
+Users are the central entity in the database as they grant parents, admin and teachers the ability to interact with the API. The User table's primary key is an ID and each instance also stores an email, password, first name and two booleans describing the type of account. Only the user's first name is stored in an effort to preserve privacy.
 
-Before normalisation, Users would store child_ids, contact_ids and comment_ids as a single user is responsible for creating these values. These values are, instead, linked via foreign key.
+Before normalisation, Users would store child instances and their associated data, a user's registered contacts and any comments that a user posts. In this normalised ERD, these values are, instead, linked to the user as a foreign key.
 
 Children are the next most prominent entity that is tracked and child tuples take their registering user's user_id as a foreign key. A user can register as many children as neccessary so it is a one-to-many relationship. Child tuples contain their first name and last name as well. Because children must be registered by their parents, teacher users cannot register children.
 
-Without normalisation, a child instance would contain their listed contacts, however, because multiple children from the same family can share a contact, it makes sense to register contacts separately and link the two entities in a join table. Similarly, comments are about children so in a non-normalised table, this data would be stored with a child. Instead, tracking comments independently allows increased functionality and less duplication.
+Without normalisation, a child instance would contain their listed contacts, however, because multiple children from the same family can share a contact, it makes sense to register contacts separately and link the two entities in a separate join table. Similarly, a non-normalised ERD would store a child's groups in the child table. However, like contacts, multiple children can each attend the same class. Therefore, separating groups into a distinct table allows for more efficient normalisation. In addition, comments are about children so in a non-normalised ERD, comments would be stored in the child table. Instead, tracking comments independently allows increased functionality and less duplication.
 
-Comments are tuples that take a user_id and a child_id as foreign keys. The user_id links the user who is writing the comment with the message whilst the child_id links the comment to its subject, an individual child. Teachers and non-teachers can make comments but, parents can only read and write comments about children they have registered. Comments track the date they were created as well as an urgency rating. The urgency rating is chosen from "urgent", "positive" and "neutral". The urgency rating is included to allow for increased front end posibilities such as a user automatically receiving emails or notifications containing urgent comments.
+Comments are tuples that take a "user_id" and a "child_id" as foreign keys. The user_id links the user who is writing the comment with the message whilst the child_id links the comment to its subject, an individual child. Teachers and non-teachers can make comments but, parents can only read and write comments about children they have registered. Comments track the date they were created as well as an urgency rating. The urgency rating is chosen from "urgent", "positive" and "neutral". The urgency rating is included to allow for increased front-end posibilities such as a user automatically receiving emails or notifications containing urgent comments.
 
-Contacts are registered by parents and linked to the user that registered them. Contacts are entered with a name, a phone number, an optional email address and an emergency contact boolean. The emergency contact boolean allows emergency requests to skip a contact if they are not designated as appropriate for certain messages. For example, a child's grandparent may be their contact for pick-up information but a parent may want behavioural-based communications to be sent directly to themselves. In these circumstances, teachers or admin can access the appropriate contacts that have been designated by a user.
+Contacts are registered by parents and linked to the user that registered them. Contacts are entered with a name, a phone number, an optional email address and an emergency contact boolean. The emergency contact boolean allows a teacher to know that they should go directly to the parent if they urgently need to get in touch. For example, a child's grandparent may be their contact for pick-up but a parent may want behavioural-based communications to be sent directly to themselves. In these circumstances, teachers or admin can access the user's contacts and look for an appropriate contact as designated by a user.
 
-The Teachers table records a teacher's first name and their email. Groups are entities that describe the information of a class or lesson. Groups require one or more teacher_id values and contain the name of a group and the day it gathers. The day data being stored in groups allows for groups that share the same name meeting on different days of the week as well as describing altered groups based on the day such as a 3-year-old class being merged with a 4-year-old class only on Thursdays. Knowing their child's group allows a parent to access contact information for the teachers that are responsible for the group.
+The Teachers table records a teacher's first name and their email. Teacher's are distinct from the group's they are registered with as one teacher may teach multiple classes. This allows for better normalisation.
 
-Attendances describe the days that a child attends child care, what group they are in and who their contact is for that day. Attendances take a child_id, group_id and contact_id as foreign keys. Attendances link all of this information so that a parent can specify different contacts for their children on different days. From the teacher's side, they can make API requests for the child's contact information on a given day.
+Groups are entities that describe the information of a class or lesson. Groups require one teacher_id value and contain the name of the group and the day it gathers. The day data being stored in group instances allows for groups that share the same name meeting on different days of the week. Knowing their child's group allows a parent to access contact information for the teachers that are responsible for the group.
 
-Attendances are a join table created to enforce data normalisation. Attendance data could be noted in a child's tuple but it is not a complete piece of information without including the group that the child is a part of, something that would be recorded many times across children. For this reason, their attendance must be linked with a group_id that links the name of the group, its teacher and what day the group meets. All of this data, in combination with a designated contact for a particular day, uniquely describes which child attends what group on which day as well as who their primary contact is for that attendance.
+Attendances describe the a child who attends the childcare service, what group they are in and who their contact is for that day. Attendances take a child_id, group_id and contact_id as foreign keys. From a teacher account, a user can make API requests to find a child's contact information on a given day. Attendances are a join table created to enforce data normalisation. Attendance data could be noted in a child's tuple but it is not a complete piece of information without including the group that the child is a part of, something that would be recorded many times across children. For this reason, their attendance must be linked with a group_id that links the name of the group, its teacher and what day the group meets. All of this data, in combination with a designated contact for a particular day, uniquely describes which child attends what group on which day as well as who their primary contact is for that attendance.
 
 ### References
 
@@ -217,9 +219,32 @@ Abba, I (2022) _[Crow's Foot Notation – Relationship Symbols And How to Read D
 
 ### This should focus on the database implementation AFTER coding has begun, eg. during the project development phase /6
 
-* Provides a BRIEF description about the project’s models and their relationships, and includes BRIEF information about how the relationships of the models interact with other models, and includes information about the queries that could be used to access data using the models’ relationships and includes appropriate code examples supporting the descriptions.
+```Python
+class User(db.Model):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    email: Mapped[str] = mapped_column(String(200))
+    password: Mapped[Optional[str]] = mapped_column(String(200))
+    first_name: Mapped[str] = mapped_column(String(200))
+    is_admin: Mapped[bool] = mapped_column(Boolean(), server_default="false")
+    is_teacher: Mapped[bool] = mapped_column(Boolean(), server_default="false")
 
-User is the core model of this app and facilitates a user's interaction with the app. The user entity describes a unique account which has an email and password and carries an individual's privileges in the boolean values is_admin and is_teacher. These values are queried throughout the application to grant or bar access to instances that were not linked to the user's profile such as registered children or contacts. In addition, a user's id value is passed when registering a child, comment or contact instance as well for further privilege checks.
+    children: Mapped[List["Child"]] = relationship(
+        back_populates="user", cascade="all, delete"
+    )
+
+    comments: Mapped[List["Comment"]] = relationship(
+        back_populates="user", cascade="all, delete"
+    )
+
+    contacts: Mapped[List["Contact"]] = relationship(
+        back_populates="user", cascade="all, delete"
+    )
+```
+
+The user model.
+
+User is the core model of this app and facilitates a user's interaction with the app. The user entity describes a unique account which has an email and password and carries an individual's privileges in the boolean values is_admin and is_teacher. These values are queried throughout the application to grant or bar access to instances that were not linked to the user's profile such as registered children or contacts. In addition, a user's id value is passed when registering a child, comment or contact instance as well for further privilege checks. Child, comment and contact instances are all relationships of the user model.
 
 ```Python
 user_type = user_status(user_id)
@@ -230,9 +255,50 @@ if user_type == "Parent":
         return ChildSchema(many=True).dump(registered_children)
 ```
 
-In this code extract from the "get_children" function, the "user_status" function accepts the user's id value (as passed via their JWT) and returns a description of their user type and privileges. This is then referred to later to designate which SQL query is sent to the database. If the user is a "Parent", the database is queried for any child instances where the child's user_id value matches the requesting user's id. Any returned results are then returned to the user. Alternatively, when requesting a single child's data, if the child's user_id does not match the user's id, they are returned a 403 unauthorised HTTP error. Meanwhile, someone with a "True" is_admin value can access both. In other interactions, these values function differently. A parent can only post comments linked to their own registered children but a teacher account or admin can post comments linked to any child.
+In this code extract from the "get_children" function, the "user_status" function accepts the user's id value (as passed via their JWT) and returns a description of their user type. This is then referred to later to designate which SQL query is sent to the database. If the user is a "Parent", the database is queried for any child instances where the child's user_id value matches the requesting user's id. Any returned results are then returned to the user. Alternatively, when requesting a single child's data, if the child's user_id does not match the user's id, they are returned a 403 unauthorised HTTP error. Meanwhile, someone with a "True" is_admin value can access both. In other interactions, these values function differently. A parent can only post comments linked to their own registered children but a teacher account or admin can post comments linked to any child.
+
+```Python
+class Child(db.Model):
+    __tablename__ = "children"
+    id: Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
+    first_name: Mapped[str] = mapped_column(String(200))
+    last_name: Mapped[str] = mapped_column(String(200))
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user: Mapped["User"] = relationship(back_populates="children")
+
+    comments: Mapped[List["Comment"]] = relationship(
+        back_populates="child", cascade="all, delete"
+    )
+    attendances: Mapped[List["Attendance"]] = relationship(
+        back_populates="child", cascade="all, delete"
+    )
+
+```
+
+The child model.
 
 Child instances are the next most significant entity and provide foreign keys for comments and attendances. Comments take user_id and child_id as foreign keys to describe which child is being commented on and by who.
+
+```Python
+class Comment(db.Model):
+    __tablename__ = "comments"
+    comment_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    message: Mapped[str] = mapped_column(Text)
+    urgency: Mapped[str] = mapped_column(String)
+    date_created: Mapped[date] = mapped_column(Date)
+
+    comment_edited: Mapped[bool] = mapped_column(Boolean(), server_default="false")
+    date_edited: Mapped[date] = mapped_column(Date, nullable=True)
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user: Mapped["User"] = relationship(back_populates="comments")
+
+    child_id: Mapped[int] = mapped_column(ForeignKey("children.id"))
+    child: Mapped["Child"] = relationship(back_populates="comments")
+```
+
+The comment model. A takes "user_id" and "child_id" as foreign keys.
 
 The user_id, child_id and comment models' relationship is leveraged when requesting a singular comment:
 
@@ -240,7 +306,7 @@ The user_id, child_id and comment models' relationship is leveraged when request
     stmt = db.select(Comment).where(Comment.child_id == id, Comment.comment_id == id2)
 ```
 
-In this line, the database is queried for comments where the child_id value matches an id value submitted via the URI, essentially requesting a particular child's comments. The specific comment is then targeted via a URI input id2 which is compared to the comment's own primary key.
+In this line, the database is queried for comments where the child_id value matches an id value submitted via the URI, requesting a particular child's comments. The specific comment is then targeted via a URI input id2 which is compared to the comment's own primary key.
 
 ```Python
     comment_dict["user"]["id"] == user_id
@@ -249,20 +315,81 @@ In this line, the database is queried for comments where the child_id value matc
 
 Later in the same endpoint function, this line checks if the person who posted the returned comment is the user requesting the comment. If the user is not and admin, teacher or the user who posted the comment, the comment is not returned. These three models combine for specific and secure queries.
 
-Users also register contacts who represent a child's point of contact for a particular day. Contacts take the a user_id foreign key which links a registered contact to a user. When a user attempts to interact with a contact, their id is compared to the user_id attribute of the contact.
+```Python
+class Contact(db.Model):
+    __tablename__ = "contacts"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    first_name: Mapped[str] = mapped_column(String(200))
+    ph_number: Mapped[int] = mapped_column(String)
+    emergency_contact: Mapped[bool] = mapped_column(server_default="false")
+    email: Mapped[str] = mapped_column(server_default="No email provided")
 
-The other models are the teacher and group entities which represent a teacher and their contact information and a class, it's name, teacher and meeting day respectively. When registering a group the admin user must provide a teacher id to link a teacher's name and their email to a group. This allows users to query to who their child's class' point of contact is.
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user: Mapped["User"] = relationship(back_populates="contacts")
 
-All models contribute to the attendances entity which describes a child, which class they attend and who their contact is on that day. A join table, the attendance model links a child instance (including it's registering user), a group instance (including its respective teacher), and a contact (also linking its registering user). By querying an attendance, a teacher is able to find out who a child's contact is for the day, if they are an emergency contact, which group the child is attending and who the group's teacher is. At a different endpoint, a parent is able to query their registered child, see a list of their registered attendances and confirm who their contact is set as on each day.
+    attendances: Mapped[List["Attendance"]] = relationship(
+        back_populates="contact", cascade="all, delete"
+    )
+```
+
+The Contact model which inherits "user_id" as a foreign key.
+
+Users also register contacts who represent a person who may be a child's point of contact on a particular day. Contacts take the a user_id foreign key which links a registered contact to a user. When a user attempts to interact with a contact, their id is compared to the user_id attribute of the contact.
+
+```Python
+class Teacher(db.Model):
+    __tablename__ = "teachers"
+    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    first_name: Mapped[str] = mapped_column(Text)
+    email: Mapped[str] = mapped_column(String(200))
+
+    groups: Mapped[List["Group"]] = relationship(
+        back_populates="teacher", cascade="all, delete"
+    )
+```
+
+The Teacher model which provides a foreign key for the Group model.
+
+```Python
+class Group(db.Model):
+    __tablename__ = "groups"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    group_name: Mapped[str] = mapped_column(Text)
+    day: Mapped[str] = mapped_column(String)
+
+    teacher_id: Mapped[int] = mapped_column(ForeignKey("teachers.id"))
+    teacher: Mapped["Teacher"] = relationship(back_populates="groups")
+
+    attendances: Mapped[List["Attendance"]] = relationship(
+        back_populates="group", cascade="all, delete"
+    )
+```
+
+The Group model.
+
+The teacher and group entities represent a teacher and their contact email and a class, it's name, teacher and meeting day respectively. When registering a group the admin user must provide a teacher_id to link that teacher to their new group. This allows users to query to who their child's class' point of contact is.
+
+```Python
+class Attendance(db.Model):
+    __tablename__ = "attendances"
+    attendance_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+
+    child_id: Mapped[int] = mapped_column(ForeignKey("children.id"))
+    child: Mapped["Child"] = relationship(back_populates="attendances")
+
+    group_id: Mapped[int] = mapped_column(ForeignKey("groups.id"))
+    group: Mapped["Group"] = relationship(back_populates="attendances")
+
+    contact_id: Mapped[int] = mapped_column(ForeignKey("contacts.id"))
+    contact: Mapped["Contact"] = relationship(back_populates="attendances")
+```
+
+The Attendance model. A join table of child, group and contact instances.
+
+The attendance model links a child instance (including it's registering user), a group instance (including its respective teacher), and a contact (also linking its registering user) in the database. By querying an attendance, a teacher is able to find out who a child's contact is for the day, if they are an emergency contact, which group the child is attending and who the group's teacher is. From the user's side, a parent is able to query their registered child, see a list of their registered attendances and confirm who their contact is set as on each day.
 
 ## R8. Explain how to use this application’s API endpoints. Each endpoint should be explained, including the following data for each endpoint /6
 
-* Identifies ALL of the application’s API endpoints, including (for each identified endpoint) the HTTP verb, route path, and any required body or header data, and includes examples of what each identified endpoint will return on success AND failure of that endpoint operation
-
-* HTTP verb
-* Path or route
-* Any required body or header data
-* Response
 
 ### Users
 
@@ -307,7 +434,7 @@ An unsuccessful GET users request.
 
 * GET
 * /users/int
-* Required header: authorised JWT, user must be an admin or the user id must match the JWT id
+* Required header: authorised JWT, user must be an admin or the user "id" must match the JWT id
 * Required body: None
 * Successful response: {user attributes: values}, 200
 * Unsuccessful responses:
@@ -322,6 +449,8 @@ A successful GET user request.
 An unsuccessful GET user request.
 
 #### CREATE User as Admin
+
+Allows for the creation of a user by an admin so that they can assign "is_admin" and "is_teacher" values.
 
 * POST
 * /users/admin
@@ -674,8 +803,6 @@ A successful attendance PATCH request.
 ![Unsuccessful attendance PATCH](docs/endpoint-ss/20-patch-attendance-unsuccess.png)
 An unsuccessful attendance PATCH request.
 
-DELETE Attendance
-
 #### DELETE Attendance
 
 * DELETE
@@ -897,7 +1024,7 @@ An unsuccessful DELETE group request.
 
 * GET
 * /contacts
-* Required header: authorised JWT, user must be a parent or admin
+* Required header: authorised JWT, user must be a parent, teacher or admin
 * Required body: None
 * Successful response: [{contact_attributes: values}], 200 - if the user is a parent, a list containing all contacts with a user_id value matching the JWT id, if the user is an admin, all registered contacts are returned
 * Unsuccessful responses:
@@ -914,7 +1041,7 @@ An unsuccessful GET contacts request.
 
 * GET
 * /contacts/int
-* Required header: authorised JWT, user must be an admin or the contact's user_id must match the JWT id
+* Required header: authorised JWT, user must be an admin, teacher or the contact's user_id must match the JWT id
 * Required body: None
 * Successful response: {contact attributes: values}, 200
 * Unsuccessful responses:
