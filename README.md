@@ -288,7 +288,10 @@ An unsuccessful POST login request.
 * Required header: authorised JWT, user must be an admin
 * Required body: None
 * Successful response: {["users": user_data]}, 200 - a list of all users and their data including registered children, contacts and attendances
-* Unsuccessful response: {"Error": "You are not authorised to access thie resource"}, 403
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
 
 ![Successful users request](docs/endpoint-ss/2-get-users-success.png)
 A successful GET users request.
@@ -306,6 +309,7 @@ An unsuccessful GET users request.
 * Unsuccessful responses:
     1. {"Error": "You are not authorised to access this resource"}, 403
     2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
 
 ![Successful GET user](docs/endpoint-ss/2a-get-user-success.png)
 A successful GET user request.
@@ -326,6 +330,7 @@ An unsuccessful GET user request.
     3. {"Error": "Request is missing field: 'field_name'"}, 400
     4. {"Error": "attribute: ["Not a valid attribute_name]"}, 400
     5. {"Error": "first_name: ["Names must not contain numbers or special characters besides hyphens, apostrophes and spaces]"}, 400
+    6. {"msg": "Token has expired}, 401
 
 ![Successful admin user post](docs/endpoint-ss/3-post-users-admin-success.png)
 A successful admin POST user request.
@@ -345,6 +350,7 @@ An unsuccessful admin POST user request.
     2. {"Error": "Request is missing field: 'field_name'"}, 400
     3. {"Error": "attribute: ["Not a valid attribute_name]"}, 400
     4. {"Error": "first_name: ["Names must not contain numbers or special characters besides hyphens, apostrophes and spaces]"}, 400
+    5. {"msg": "Token has expired}, 401
 
 ![Successful unauthorised user post](docs/endpoint-ss/4-post-user-success.png)
 A successful unauthorised POST user request.
@@ -352,7 +358,7 @@ A successful unauthorised POST user request.
 ![Unsuccessful unauthorised user post](docs/endpoint-ss/4-post-user-unsuccess.png)
 An unsuccessful unauthorised POST user request.
 
-#### UPDATE User
+#### PATCH User
 
 * PATCH
 * /users/int
@@ -366,6 +372,7 @@ An unsuccessful unauthorised POST user request.
     3. {"Error": "Please provide at least one value to update"}, 400
     4. {"Error": "attribute: ["Not a valid attribute_name]"}, 400
     5. {"Error": "No resource found"}, 404
+    6. {"msg": "Token has expired}, 401
 
 ![Successful user PATCH](docs/endpoint-ss/5-patch-user-success.png)
 A successful user PATCH request.
@@ -383,6 +390,7 @@ An usuccessful user PATCH request.
 * Unsuccessful responses:
     1. {"Error": "You are not authorised to access this resource"}, 403
     2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
 
 ![Successful DELETE user](docs/endpoint-ss/6-delete-user-success.png)
 A successful DELETE user request.
@@ -420,6 +428,7 @@ An unsuccessful GET children request.
 * Unsuccessful responses:
     1. {"Error": "You are not authorised to access this resource"}, 403
     2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
 
 ![Successful GET user](docs/endpoint-ss/8-get-child-success.png)
 A successful GET child request.
@@ -427,12 +436,12 @@ A successful GET child request.
 ![Unsuccessful GET user](docs/endpoint-ss/8-get-child-unsuccess.png)
 An unsuccessful GET child request.
 
-#### CREATE Child
+#### POST Child
 
 * POST
-* /users/children
+* /children
 * Required header: authorised JWT, user must be an admin or a parent
-* Required body: first_name, last_name. If admin, a user_id must be provided. If parent, user_id is automatically set to JWT id value
+* Required body: "first_name", "last_name". If admin, a user_id must be provided. If parent, user_id is automatically set to JWT id value
 * Successful response: {"Success": registered child data}, 200
 * Unsuccessful responses:
     1. {"Error": "You are not authorised to access this resource"}, 403
@@ -440,6 +449,7 @@ An unsuccessful GET child request.
     3. {"Error": "Request is missing field: 'field_name'"}, 400
     4. {"Error": "attribute: ["Not a valid attribute_name]"}, 400
     5. {"Error": "first/last_name: ["Names must not contain numbers or special characters besides hyphens, apostrophes and spaces]"}, 400
+    6. {"msg": "Token has expired}, 401
 
 ![Successful admin child post](docs/endpoint-ss/9-post-child-success.png)
 A successful admin POST child request.
@@ -447,10 +457,10 @@ A successful admin POST child request.
 ![Unsuccessful admin child post](docs/endpoint-ss/9-post-child-unsuccess.png)
 An unsuccessful admin POST child request.
 
-#### UPDATE Child
+#### PATCH Child
 
 * PATCH
-* /child/int
+* /children/int
 * Required header: authorised JWT, user must be an admin or the child's user_id must match the JWT id
 * Required body: one of first_name or last_name.
 * Successful response: {"Updated fields": { attribute: updated_value}}, 200
@@ -459,14 +469,31 @@ An unsuccessful admin POST child request.
     2. {"Error": "Please provide at least one value to update"}, 400
     3. {"Error": "first/last_name: ["Names must not contain numbers or special characters besides hyphens, apostrophes and spaces]"}, 400
     4. {"Error": "No resource found"}, 404
+    5. {"msg": "Token has expired}, 401
 
-![Successful user PATCH](docs/endpoint-ss/10-patch-child-success.png)
+![Successful child PATCH](docs/endpoint-ss/10-patch-child-success.png)
 A successful child PATCH request.
 
-![Unsuccessful user PATCH](docs/endpoint-ss/10-patch-child-unsuccess.png)
+![Unsuccessful child PATCH](docs/endpoint-ss/10-patch-child-unsuccess.png)
 An unsuccessful child PATCH request.
 
-DELETE Child
+#### DELETE Child
+
+* DELETE
+* /children/int
+* Required header: authorised JWT, user must be an admin
+* Required body: None
+* Successful response: {"Success": "Child registration deleted"}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
+
+![Successful DELETE child](docs/endpoint-ss/11-delete-child-success.png)
+A successful DELETE child request.
+
+![Unsuccessful DELETE child](docs/endpoint-ss/11-delete-child-unsuccess.png)
+An unsuccessful DELETE child request.
 
 * DELETE
 * /Children/<int:id>
@@ -475,38 +502,207 @@ DELETE Child
 
 ### Comments
 
-GET Comments
+#### GET Comments
 
 * GET
-* /children/<int:id>/comments
-* JWT_Token where is_admin == True, is_teacher == True or children.user_id == get_JWT_identity
-* Response: date_created, urgency, children.first_name, children.last_name, message, 200/400, 401
+* /children/int/comments
+* Required header: authorised JWT, user must be an admin or teacher or child user_id must match JWT id
+* Required body: None
+* Successful response: {"child_attributes": "values", "comments": [{"comment_attributes" : "attribute_values"}]}, 200 - a child and a list of all their comments and their data
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
 
-CREATE Comment
+![Successful GET child's comments request](docs/endpoint-ss/12-get-child-comments-success.png)
+A successful GET child's comments request.
+
+![Unsuccessful GET child's comments request](docs/endpoint-ss/12-get-child-comments-unsuccess.png)
+An unsuccessful GET child's comments request.
+
+#### GET Comment
+
+* GET
+* /children/int/comments/int
+* Required header: authorised JWT, user must be an admin or the child's user_id must match the JWT id
+* Required body: None
+* Successful response: {comment_attributes: values}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
+
+![Successful GET comment](docs/endpoint-ss/13-get-child-comment-success.png)
+A successful GET comment request.
+
+![Unsuccessful GET comment](docs/endpoint-ss/13-get-child-comment-unsuccess.png)
+An unsuccessful GET comment request.
+
+#### POST Comment
 
 * POST
-* /children/<int:id>/comments
-* JWT_Token where is_admin == True, is_teacher == True or children.user_id == get_JWT_identity
-* Response: {Success: comment posted, date_created, urgency, children.first_name, children.last_name, message}, 200/400, 401
+* /children/id/comments
+* Required header: authorised JWT, user must be an admin or teacher or child user_id must match JWT id
+* Required body: "message", "urgency", , "child_id" is passed in URI
+* Successful response: {"Success": registered comment data}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "Request is missing field: 'field_name'"}, 400
+    3. {"Error": "attribute: ["Not a valid attribute_name]"}, 400
+    4. {"Error": "message": ["Comments need to be at least 3 characters long"]}, 400
+    5. {"msg": "Token has expired}, 401
 
-DELETE Comment
+![Successful comment post](docs/endpoint-ss/14-post-child-comment-success.png)
+A successful POST comment request.
 
-* DELETE
-* /children/<int:id>/comments
-* JWT_Token where is_admin == True, or children.user_id == get_JWT_identity, or comment.user_id == get_JWT_identity
-* Response: {Success: comment deleted}, 200/400, 401
+![Unsuccessful comment post](docs/endpoint-ss/14-post-child-comment-unsuccess.png)
+An unsuccessful POST comment request.
 
-UPDATE Comment
+#### PATCH Comment
 
 * PATCH
-* /children/<int:id>/comments
-* JWT_Token where is_admin == True, or children.user_id == get_JWT_identity, or comment.user_id == get_JWT_identity
-* Body: comment_id
-* Response: {Success: comment updated, field_updated: new_value}, 200/400, 401
+* /children/int/comments/int
+* Required header: authorised JWT, user's JWT -d must match comment's user_id
+* Required body: one of "message" or "urgency".
+* Successful response: {comment_attributes: comment_fields}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "Please provide at least one value to update"}, 400
+    3. {"Error": "urgency: ["Must be one of urgent, positive, neutral."]}, 400
+    4. {"Error": "No resource found"}, 404
+    5. {"msg": "Token has expired}, 401
+
+![Successful comment PATCH](docs/endpoint-ss/15-patch-comment-success.png)
+A successful comment PATCH request.
+
+![Unsuccessful comment PATCH](docs/endpoint-ss/15-patch-comment-unsuccess.png)
+An unsuccessful comment PATCH request.
+
+#### DELETE Comment
+
+* DELETE
+* /children/int/comment/int
+* Required header: authorised JWT, user must be an admin or comment user_id must match JWT id
+* Required body: None
+* Successful response: {"Success": "Comment deleted"}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
+
+![Successful DELETE comment](docs/endpoint-ss/16-delete-comment-success.png)
+A successful DELETE comment request.
+
+![Unsuccessful DELETE comment](docs/endpoint-ss/11-delete-comment-unsuccess.png)
+An unsuccessful DELETE comment request.
+
+### Attendances
+
+#### GET Attendances
+
+* GET
+* /children/int/attendances
+* Required header: authorised JWT, user must be an admin or teacher or child user_id must match JWT id
+* Required body: None
+* Successful response: [{attendance_attributes: values}], 200 - a list containing all of a child's attendances and their attributes
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
+
+![Successful GET child's attendances request](docs/endpoint-ss/17-get-attendances-success.png)
+A successful GET child's attendances request.
+
+![Unsuccessful GET child's attendances request](docs/endpoint-ss/17-get-attendances-unsuccess.png)
+An unsuccessful GET child's attendances request.
+
+#### GET Attendance
+
+* GET
+* /children/int/attendances/int
+* Required header: authorised JWT, user must be an admin or teacher or child user_id must match JWT id
+* Required body: None
+* Successful response: {attendance_attributes: values}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
+
+![Successful GET attendance](docs/endpoint-ss/18-get-attendance-success.png)
+A successful GET attendance request.
+
+![Unsuccessful GET attendance](docs/endpoint-ss/18-get-attendance-unsuccess.png)
+An unsuccessful GET attendance request.
+
+#### CREATE Attendance
+
+* POST
+* /children/id/attendances
+* Required header: authorised JWT, user must be an admin or child user_id must match JWT id
+* Required body: "group_id", "contact_id", "child_id" is passed in URI
+* Successful response: {"Success": registered comment data}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "attribute: ["Not a valid attribute_name]"}, 400
+    3. {"Error": "Please enter a contact_id registered to your account"}, 400
+    4. {"msg": "Token has expired}, 401
+    5. {"Error": "Child attendance is already registered for that group"}, 400
+    6. {"Error": "One of the provided values does not exist. Please ensure both values in the request body are accurate"}, 400
+
+![Successful attendance post](docs/endpoint-ss/19-post-attendance-success.png)
+A successful POST attendance request.
+
+![Unsuccessful attendance post](docs/endpoint-ss/19-post-attendance-unsuccess.png)
+An unsuccessful POST attendance request.
+
+#### PATCH Attendance
+
+* PATCH
+* /children/int/attendance/int
+* Required header: authorised JWT, user's JWT -d must match comment's user_id
+* Required body: one of "message" or "urgency".
+* Successful response: {comment_attributes: comment_fields}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "Please provide at least one value to update"}, 400
+    3. {"Error": "urgency: ["Must be one of urgent, positive, neutral."]}, 400
+    4. {"Error": "No resource found"}, 404
+    5. {"msg": "Token has expired}, 401
+
+![Successful comment PATCH](docs/endpoint-ss/15-patch-comment-success.png)
+A successful comment PATCH request.
+
+![Unsuccessful comment PATCH](docs/endpoint-ss/15-patch-comment-unsuccess.png)
+An unsuccessful comment PATCH request.
+
+DELETE Attendance
+
+* DELETE
+* /children/attendances/<int:id>
+* JWT_Token where is_admin == True, or child.user_id == get_JWT_identity
+* Response: {Success: attendance deleted}, 200/400, 401
 
 ### Teachers
 
 GET Teacher
+
+#### GET Comments
+
+* GET
+* /children/int/comments
+* Required header: authorised JWT, user must be an admin or teacher or child user_id must match JWT id
+* Required body: None
+* Successful response: {"child_attributes": "values", "comments": [{"comment_attributes" : "attribute_values"}]}, 200 - a child and a list of all their comments and their data
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
+
+![Successful GET child's comments request](docs/endpoint-ss/12-get-child-comments-success.png)
+A successful GET child's comments request.
+
+![Unsuccessful GET child's comments request](docs/endpoint-ss/12-get-child-comments-unsuccess.png)
+An unsuccessful GET child's comments request.
 
 * GET
 * /teachers or teachers/<int:id>
@@ -601,38 +797,6 @@ DELETE Teacher
 * /groups/<int:id>
 * JWT_Token where is_admin == True
 * Response: {Success: group deleted}, 200/400, 401
-
-### Attendances
-
-GET Attendance
-
-* GET
-* /children/attendances/<int:id>
-* JWT_Token where is_admin == True, is_teacher == True or children.user_id == get_JWT_identity
-* Response: {children.first_name, children.last_name}, {group.name, group.day}, {contact.first_name, contact.ph_number, contact.emergency_cont, contact.email}, 200/400, 401
-
-CREATE Attendance
-
-* POST
-* /children/attendances
-* JWT_Token where is_admin == True, is_teacher == False
-* Body: child_id, group_id, contact_id
-* Response: {Success: attendance registered, {children.first_name, children.last_name}, {group.name, group.day}, {contact.first_name, contact.ph_number, contact.emergency_cont, contact.email}}, 200/400, 401
-
-UPDATE Attendance
-
-* PATCH
-* /children/attendances/<int:id>
-* JWT_Token where is_admin == True, or child.user_id == get_JWT_identity
-* Body: updated_field: new_value
-* Response: {Success: contact updated, field_updated: new_value}, 200/400, 401
-
-DELETE Attendance
-
-* DELETE
-* /children/attendances/<int:id>
-* JWT_Token where is_admin == True, or child.user_id == get_JWT_identity
-* Response: {Success: attendance deleted}, 200/400, 401
 
 ## Additional Notes
 

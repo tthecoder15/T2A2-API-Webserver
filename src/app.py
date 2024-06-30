@@ -32,12 +32,19 @@ def not_found(err):
 @app.errorhandler(ValidationError)
 def invalid_request(err):
     if "_schema" in vars(err)["messages"]:
-        vars(err)["messages"]["_schema"] = "Invalid input. Please check your request body's formatting"
+        vars(err)["messages"][
+            "_schema"
+        ] = "Invalid input. Please check your request body's formatting"
     return {"Error": vars(err)["messages"]}, 400
 
 
 @app.errorhandler(IntegrityError)
 def integrity_error(err):
+    print(err.__dict__)
+    if vars(err)["code"] == "gkpj":
+        return {
+            "Error": "One of the provided values does not exist. Please ensure both values in the request body are accurate"
+        }
     return {"Error": str(vars(err)["orig"])}, 400
 
 
