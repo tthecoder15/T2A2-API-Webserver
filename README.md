@@ -32,6 +32,8 @@ XAP b (n.d.) _[Choose the best plan for you. No upfront payment.](https://xap.ne
 
 For this project, I am using an Agile workflow supplemented by a Trello board as a digital Kanban board (Brede Moe et al., 2014). To do this, I split the overall tasks into smaller tasks and categorised them based on their urgency and impact on other tasks. I entered this information onto my project Trello board, divided my available time and added deadlines to the tasks. I then maintained this Trello board and documented my progress with screenshots at the end of each day. At the beginning of the following day, I reviewed my progress from the prior day, made any neccessary adjustments to the checklist and deadlines and prioritised the next cluster of tasks.
 
+[Link to Trello board](https://trello.com/b/qjiEagpD/t2a2-api-webserver-pm).
+
 ![Initial outline of tasks to complete](docs/1-task-outline.png)
 An initial list of the tasks required to complete the project with an estimated urgency assigned.
 
@@ -67,6 +69,9 @@ The Trello board after nine days of work. During this day I troubleshooted some 
 
 ![Trello Board screenshot after day 10](docs/agile-11.png)
 The Trello board after 10 days of work. After realising that code commenting was taking an extensive time, I decided to answer remaining questions first, as a more important consideration. This sets me up for a smooth final day of work where I only have to finish 2 questions before completing the code comments.
+
+![Trello Board screenshot after day 11](docs/agile-12.png)
+The Trello board after 11 days of work. Finally completed.
 
 ### References
 
@@ -389,7 +394,6 @@ The Attendance model. A join table of child, group and contact instances.
 The attendance model links a child instance (including it's registering user), a group instance (including its respective teacher), and a contact (also linking its registering user) in the database. By querying an attendance, a teacher is able to find out who a child's contact is for the day, if they are an emergency contact, which group the child is attending and who the group's teacher is. From the user's side, a parent is able to query their registered child, see a list of their registered attendances and confirm who their contact is set as on each day.
 
 ## R8. Explain how to use this application’s API endpoints. Each endpoint should be explained, including the following data for each endpoint /6
-
 
 ### Users
 
