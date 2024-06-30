@@ -74,12 +74,27 @@ Brede Moe, N., Dingsøyr, T., Dyba, T. (2014) 'Agile Project Management', in Ruh
 
 * The description provided is DETAILED, and the description details ALL of the services, packages or dependencies that are used in the developed application.
 
-bcrypt==4.1.3
-Flask-JWT-Extended==4.6.0
 Flask==3.0.3
-marshmallow-sqlalchemy==1.0.0
-python-dotenv==1.0.1
+
+sql-alchemy
+
+#### Flask-JWT-Extended
+
+Flask-JWT-Extended is a pip package used to generate JWTs (JSON Web Tokens). JWTs are generated strings which contain data in three parts: the header, payload and signature. The header is the section of a JWT that describes which algorithm the token was generated with whilst the payload describes values included in the token such as how long the token should be considered validated and any optional data included in a key pair. The signature confirms which system issued the token and considers a secret key, passed when generating the key, the values in the payload and the formatting described in the header. Whilst data in a JWT's header and payload can be deciphered, the secret key is not revealed in the token itself meaning that a duplicate signature cannot be forged and proving the token came from a trusted source. In this app, Flask-JWT-Extended generates tokens when users log in and authenticates them when requests are made to the various endpoints, ensuring users can only access appropriate resources.
+
+#### bcrypt
+
+Bcrypt is a dependency within the app used to hash user passwords so that they can be stored in the database in a non-plain text format. Within the app, a bcrypt instance is first initialised which containts various methods for creating and interpreting hashed passwords. Hashing generates a fixed length but unpredictable string which masks the input string. The returned hash can be recreated using the same hashing function on the same input string but, because hashed values are always the same length, an infinite number of strings can generate the same hashed value. To login in this app and generate a JWT, a user passes a request containing a password string, it is then passed through the hashing method and compared to the stored, already-hashed password recorded and compared. If they have equal values, the user is returned a JWT.
+
 psycopg2
+
+marshmallow-sqlalchemy==1.0.0
+
+python-dotenv==1.0.1
+
+### References
+
+GeeksforGeeks (2024) _[What is Object-Relational Mapping (ORM) in DBMS?](https://www.geeksforgeeks.org/what-is-object-relational-mapping-orm-in-dbms/)_, GeeksforGeeks website, accessed 30 June 2024.
 
 ## R4. Explain the benefits and drawbacks of this app’s underlying database system /6
 
