@@ -442,7 +442,7 @@ An unsuccessful GET child request.
 * /children
 * Required header: authorised JWT, user must be an admin or a parent
 * Required body: "first_name", "last_name". If admin, a user_id must be provided. If parent, user_id is automatically set to JWT id value
-* Successful response: {"Success": registered child data}, 200
+* Successful response: {"Success": registered child data}, 201
 * Unsuccessful responses:
     1. {"Error": "You are not authorised to access this resource"}, 403
     2. {"Error": "This child is already registered to this user"}, 400
@@ -495,11 +495,6 @@ A successful DELETE child request.
 ![Unsuccessful DELETE child](docs/endpoint-ss/11-delete-child-unsuccess.png)
 An unsuccessful DELETE child request.
 
-* DELETE
-* /Children/<int:id>
-* JWT_Token where is_admin == True, or children.user_id == get_JWT_identity
-* Response: {Success: child deleted}
-
 ### Comments
 
 #### GET Comments
@@ -544,7 +539,7 @@ An unsuccessful GET comment request.
 * /children/id/comments
 * Required header: authorised JWT, user must be an admin or teacher or child user_id must match JWT id
 * Required body: "message", "urgency", , "child_id" is passed in URI
-* Successful response: {"Success": registered comment data}, 200
+* Successful response: {"Success": registered comment data}, 201
 * Unsuccessful responses:
     1. {"Error": "You are not authorised to access this resource"}, 403
     2. {"Error": "Request is missing field: 'field_name'"}, 400
@@ -581,7 +576,7 @@ An unsuccessful comment PATCH request.
 #### DELETE Comment
 
 * DELETE
-* /children/int/comment/int
+* /children/int/comments/int
 * Required header: authorised JWT, user must be an admin or comment user_id must match JWT id
 * Required body: None
 * Successful response: {"Success": "Comment deleted"}, 200
@@ -640,7 +635,7 @@ An unsuccessful GET attendance request.
 * /children/id/attendances
 * Required header: authorised JWT, user must be an admin or child user_id must match JWT id
 * Required body: "group_id", "contact_id", "child_id" is passed in URI
-* Successful response: {"Success": registered comment data}, 200
+* Successful response: {"Success": registered comment data}, 201
 * Unsuccessful responses:
     1. {"Error": "You are not authorised to access this resource"}, 403
     2. {"Error": "attribute: ["Not a valid attribute_name]"}, 400
@@ -658,81 +653,164 @@ An unsuccessful POST attendance request.
 #### PATCH Attendance
 
 * PATCH
-* /children/int/attendance/int
-* Required header: authorised JWT, user's JWT -d must match comment's user_id
-* Required body: one of "message" or "urgency".
-* Successful response: {comment_attributes: comment_fields}, 200
+* /children/int/attendances/int
+* Required header: authorised JWT, user must be an admin or child user_id must match JWT id
+* Required body: one of "group_id" or "contact_id".
+* Successful response: {attendance_attributes: values}, 200
 * Unsuccessful responses:
     1. {"Error": "You are not authorised to access this resource"}, 403
     2. {"Error": "Please provide at least one value to update"}, 400
-    3. {"Error": "urgency: ["Must be one of urgent, positive, neutral."]}, 400
-    4. {"Error": "No resource found"}, 404
-    5. {"msg": "Token has expired}, 401
+    3. {"Error": "No resource found"}, 404
+    4. {"msg": "Token has expired}, 401
+    5. {"Error": "One of the provided values does not exist. Please ensure both values in the request body are accurate"}, 400
 
-![Successful comment PATCH](docs/endpoint-ss/15-patch-comment-success.png)
-A successful comment PATCH request.
+![Successful attendance PATCH](docs/endpoint-ss/20-patch-attendance-success.png)
+A successful attendance PATCH request.
 
-![Unsuccessful comment PATCH](docs/endpoint-ss/15-patch-comment-unsuccess.png)
-An unsuccessful comment PATCH request.
+![Unsuccessful attendance PATCH](docs/endpoint-ss/20-patch-attendance-unsuccess.png)
+An unsuccessful attendance PATCH request.
 
 DELETE Attendance
 
+#### DELETE Attendance
+
 * DELETE
-* /children/attendances/<int:id>
-* JWT_Token where is_admin == True, or child.user_id == get_JWT_identity
-* Response: {Success: attendance deleted}, 200/400, 401
-
-### Teachers
-
-GET Teacher
-
-#### GET Comments
-
-* GET
-* /children/int/comments
-* Required header: authorised JWT, user must be an admin or teacher or child user_id must match JWT id
+* /children/int/attendances/int
+* Required header: authorised JWT, user must be an admin or child user_id must match JWT id
 * Required body: None
-* Successful response: {"child_attributes": "values", "comments": [{"comment_attributes" : "attribute_values"}]}, 200 - a child and a list of all their comments and their data
+* Successful response: {"Success": "Attendance deleted"}, 200
 * Unsuccessful responses:
     1. {"Error": "You are not authorised to access this resource"}, 403
     2. {"Error": "No resource found"}, 404
     3. {"msg": "Token has expired}, 401
 
-![Successful GET child's comments request](docs/endpoint-ss/12-get-child-comments-success.png)
-A successful GET child's comments request.
+![Successful DELETE comment](docs/endpoint-ss/21-delete-attendance-success.png)
+A successful DELETE attendance request.
 
-![Unsuccessful GET child's comments request](docs/endpoint-ss/12-get-child-comments-unsuccess.png)
-An unsuccessful GET child's comments request.
+![Unsuccessful DELETE attendance](docs/endpoint-ss/21-delete-attendance-unsuccess.png)
+An unsuccessful DELETE attendance request.
+
+### Teachers
+
+#### GET Teachers
 
 * GET
-* /teachers or teachers/<int:id>
-* JWT_Token where is_admin == True, is_teacher == True
-* Response: {teacher_id, first_name, email}, 200/400, 401
-
-CREATE Teacher
-
-* PUT
 * /teachers
-* JWT_Token where is_admin == True
-* Body: {first_name, email}
-* Response: {teacher_id, first_name, email}, 200/400, 401
+* Required header: authorised JWT, user must be an admin
+* Required body: None
+* Successful response: [{teacher_attributes: values}], 200 - a list containing all teacher instances and their attributes
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"msg": "Token has expired}, 401
 
-* is_admin == True
+![Successful teachers request](docs/endpoint-ss/22-get-teachers-success.png)
+A successful GET teachers request.
 
-UPDATE Teacher
+![Unsuccessful teachers request](docs/endpoint-ss/22-get-teachers-unsuccess.png)
+An unsuccessful GET teachers request.
+
+#### GET Teacher
+
+* GET
+* /teachers/int
+* Required header: authorised JWT, user must be an admin
+* Required body: None
+* Successful response: {teacher_attributes: values}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
+
+![Successful GET teacher](docs/endpoint-ss/23-get-teacher-success.png)
+A successful GET teacher request.
+
+![Unsuccessful GET teacher](docs/endpoint-ss/23-get-teacher-unsuccess.png)
+An unsuccessful GET teacher request.
+
+#### POST Teacher
+
+* POST
+* /teachers
+* Required header: authorised JWT, user must be an admin
+* Required body: "first_name" and "email" values
+* Successful response: {"Success": {teacher_attributes: values}}, 201
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "A teacher is already registered with this email"}, 400
+    3. {"Error": "Request is missing field: 'field_name'"}, 400
+    4. {"Error": "attribute: ["Not a valid attribute_name]"}, 400
+    5. {"Error": "first_name": ["Names must not contain numbers or special characters besides hyphens, apostrophes and spaces"]}, 400
+    6. {"msg": "Token has expired}, 401
+
+![Successful teacher post](docs/endpoint-ss/24-post-teacher-success.png)
+A successful teacher POST request.
+
+![Unsuccessful teacher post](docs/endpoint-ss/24-post-teacher-unsuccess.png)
+An unsuccessful teacher POST request.
+
+#### PATCH Teacher
 
 * PATCH
-* /teachers/<int:id>
-* JWT_Token where is_admin == True
-* Body: first_name or email
-* Response: {Success: teacher updated, updated_field: new_value}, 200/400, 401
+* /teachers/int
+* Required header: authorised JWT, user must be an admin
+* Required body: one of "first_name" or "email".
+* Successful response: {"Updated fields": { attribute: updated_value}}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "Please provide at least one value to update"}, 400
+    3. {"Error": "first/last_name: ["Names must not contain numbers or special characters besides hyphens, apostrophes and spaces]"}, 400
+    4. {"Error": "No resource found"}, 404
+    5. {"msg": "Token has expired}, 401
+    6. {"Error": "A teacher is already registered with this email"}, 400
 
-DELETE Teacher
+![Successful teacher PATCH](docs/endpoint-ss/25-patch-teacher-success.png)
+A successful teacher PATCH request.
+
+![Unsuccessful teacher PATCH](docs/endpoint-ss/25-patch-teacher-unsuccess.png)
+An unsuccessful teacher PATCH request.
+
+#### DELETE Teacher
 
 * DELETE
-* /teachers/<int:id>
+* /teachers/int
+* Required header: authorised JWT, user must be an admin
+* Required body: None
+* Successful response: {"Success": "Teacher registration deleted"}, 200
+* Unsuccessful responses:
+    1. {"Error": "You are not authorised to access this resource"}, 403
+    2. {"Error": "No resource found"}, 404
+    3. {"msg": "Token has expired}, 401
+
+![Successful DELETE teacher](docs/endpoint-ss/26-delete-teacher-success.png)
+A successful DELETE child request.
+
+![Unsuccessful DELETE teacher](docs/endpoint-ss/26-delete-teacher-unsuccess.png)
+An unsuccessful DELETE teacher request.
+
+### Groups
+
+GET Group
+
+* GET
+* /groups or groups/<int:id>
+* JWT_Token
+* Response: {name, teacher_id, day, teacher.first_name, teacher.email}, 200/400, 401
+
+CREATE Group
+
+* PUT
+* /groups
 * JWT_Token where is_admin == True
-* Response: {Success: teacher deleted}, 200/400, 401
+* Body: {name, teacher_id, day}
+* Response: {Success: group created, {name, teacher_id, day}}, 200/400, 401
+
+UPDATE Group
+
+* PATCH
+* /groups/<int:id>
+* JWT_Token where is_admin == True
+* Body: {field_update: new_value}
+* Response: {Success: group updated, updated_field: new_value}, 200/400, 401
 
 ### Contacts
 
@@ -765,38 +843,6 @@ DELETE Contact
 * /contacts/<int:id>
 * JWT_Token where is_admin == True, or contact.user_id == get_JWT_identity
 * Response: {Success: contact deleted}, 200/400, 401
-
-### Groups
-
-GET Group
-
-* GET
-* /groups or groups/<int:id>
-* JWT_Token
-* Response: {name, teacher_id, day, teacher.first_name, teacher.email}, 200/400, 401
-
-CREATE Group
-
-* PUT
-* /groups
-* JWT_Token where is_admin == True
-* Body: {name, teacher_id, day}
-* Response: {Success: group created, {name, teacher_id, day}}, 200/400, 401
-
-UPDATE Group
-
-* PATCH
-* /groups/<int:id>
-* JWT_Token where is_admin == True
-* Body: {field_update: new_value}
-* Response: {Success: group updated, updated_field: new_value}, 200/400, 401
-
-DELETE Teacher
-
-* DELETE
-* /groups/<int:id>
-* JWT_Token where is_admin == True
-* Response: {Success: group deleted}, 200/400, 401
 
 ## Additional Notes
 

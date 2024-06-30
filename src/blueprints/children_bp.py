@@ -908,7 +908,7 @@ def get_attendance(id, id2):
         return {"Error": "No resource found"}, 404
 
 
-# CREATE child's attendance
+# POST child's attendance
 @children_bp.route("/<int:id>/attendances", methods=["POST"])
 @jwt_required()
 def post_attendance(id):

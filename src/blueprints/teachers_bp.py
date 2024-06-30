@@ -8,7 +8,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 teachers_bp = Blueprint("teacher", __name__, url_prefix="/teachers")
 
 
-# READ Teacher
+# READ Teachers
 @teachers_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_teachers():
@@ -19,7 +19,7 @@ def get_teachers():
         teachers = db.session.scalars(stmt).all()
         return TeacherSchema(many=True).dump(teachers)
     else:
-        return{"Error": "You are not authorised to access this resource"}, 403 
+        return {"Error": "You are not authorised to access this resource"}, 403
 
 
 @teachers_bp.route("/<int:id>", methods=["GET"])
@@ -32,7 +32,7 @@ def get_teacher(id):
     if admin_check(user_id):
         return teacher_dict
     else:
-        return{"Error": "You are not authorised to access this resource"}, 403
+        return {"Error": "You are not authorised to access this resource"}, 403
 
 
 # CREATE Teacher
@@ -40,10 +40,10 @@ def get_teacher(id):
 @jwt_required()
 def register_teacher():
     user_id = get_jwt_identity()
-    if admin_check(user_id):    
-        teacher_info = TeacherSchema(only=["first_name", "email"], unknown="exclude").load(
-            request.json
-        )
+    if admin_check(user_id):
+        teacher_info = TeacherSchema(
+            only=["first_name", "email"], unknown="exclude"
+        ).load(request.json)
 
         new_teacher = Teacher(
             first_name=teacher_info["first_name"].capitalize(),
@@ -57,15 +57,15 @@ def register_teacher():
         )
         registered_teacher = db.session.scalar(stmt)
         if registered_teacher:
-            return{"Error": "A teacher is already registered with this email"}, 400
+            return {"Error": "A teacher is already registered with this email"}, 400
 
         db.session.add(new_teacher)
         db.session.commit()
         return {"Success": TeacherSchema().dump(new_teacher)}, 201
 
     else:
-        return{"Error": "You are not authorised to access this resource"}, 403 
-            
+        return {"Error": "You are not authorised to access this resource"}, 403
+
 
 # UPDATE Teacher
 @teachers_bp.route("/<int:id>", methods=["PATCH"])
@@ -75,6 +75,13 @@ def update_teacher(id):
 
     if "first_name" in request.json:
         request.json["first_name"] = request.json["first_name"].capitalize()
+    if "email" in request.json:
+        stmt = db.select(Teacher).where(Teacher.email == request.json["email"])
+        registered_teacher = db.session.scalar(stmt)
+        if registered_teacher:
+            return {
+                "Error": "A teacher is already registered with this email"
+            }, 400
 
     new_info = TeacherSchema(
         only=["email", "first_name"],
@@ -93,7 +100,7 @@ def update_teacher(id):
         db.session.commit()
         return {"Updated fields": new_info}, 200
     else:
-        return{"Error": "You are not authorised to access this resource"}, 403 
+        return {"Error": "You are not authorised to access this resource"}, 403
 
 
 # DELETE Teacher
@@ -107,4 +114,4 @@ def delete_teacher(id):
         db.session.commit()
         return {"Success": "Teacher registration deleted"}, 200
     else:
-        return{"Error": "You are not authorised to access this resource"}, 403
+        return {"Error": "You are not authorised to access this resource"}, 403
