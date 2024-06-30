@@ -72,29 +72,33 @@ Brede Moe, N., Dingsøyr, T., Dyba, T. (2014) 'Agile Project Management', in Ruh
 
 ## R3. List and explain the third-party services, packages and dependencies used in this app /6
 
-* The description provided is DETAILED, and the description details ALL of the services, packages or dependencies that are used in the developed application.
+### Flask==3.0.3
 
-Flask==3.0.3
+Flask is a web framework package that provides the tools and templates used to define endpoints, link them to appropriate functions and handle their request bodies, allowing the app to be run on a server. Flask contains methods and decorators which a developer calls in the app's modules to interact with the user's requests, effectively abstracting the routing and connection coding to behind-the-scenes. Built into Flask are error definitions that expand on Pythonic errors and describe the required behaviour for a route or function to work as intended. In addition, Flask contains an errorhandler wrapper that allows a developer to customise the response messages that a user receives for clarity.
 
-sql-alchemy
+### SQLAlchemy==2.0.31
+
+SQLAlchemy is an Object Relational Mapper (ORM) used to generate models which mirror the data structure of a relational database (described in more detail in question 5). Within the app, SQLAlchemy provides Python classes which are used to create inheriting classes which describe the data structures of a connected PostgreSQL database table. Other classes are provided in the package to attribute values including data types and functionality such as default values which are automatically passed to the database if no user input is provided for a particular field.
+
+### marshmallow==3.21.3
+
+Marshmallow is a library which provides methods to convert foreign object types to Python data types. Within the app, marshmallow converts SQLAlchemy objects to Python dictionaries. Marshmallow's provided classes are used to create schema's which, similar to SQLAlchemy models, mirror the data stored in a connected relational database so that attributes and values can be returned as key pairs. These schemas are utilised between the SQLAlchemy requests and returns and the application itself, filtering the user's inputs and responses. For example, marshmallow's built in validators can raise an error if a user enters a string for an email address that does not conclude the "@domain.com" format or if an integer field is passed a string. Similarly, marshmallow schemas filter returned data within the app, removing some fields from the dictionary that is returned to a user such a password value for a GET user request.
 
 #### Flask-JWT-Extended
 
 Flask-JWT-Extended is a pip package used to generate JWTs (JSON Web Tokens). JWTs are generated strings which contain data in three parts: the header, payload and signature. The header is the section of a JWT that describes which algorithm the token was generated with whilst the payload describes values included in the token such as how long the token should be considered validated and any optional data included in a key pair. The signature confirms which system issued the token and considers a secret key, passed when generating the key, the values in the payload and the formatting described in the header. Whilst data in a JWT's header and payload can be deciphered, the secret key is not revealed in the token itself meaning that a duplicate signature cannot be forged and proving the token came from a trusted source. In this app, Flask-JWT-Extended generates tokens when users log in and authenticates them when requests are made to the various endpoints, ensuring users can only access appropriate resources.
 
-#### bcrypt
+#### bcrypt==4.1.3
 
 Bcrypt is a dependency within the app used to hash user passwords so that they can be stored in the database in a non-plain text format. Within the app, a bcrypt instance is first initialised which containts various methods for creating and interpreting hashed passwords. Hashing generates a fixed length but unpredictable string which masks the input string. The returned hash can be recreated using the same hashing function on the same input string but, because hashed values are always the same length, an infinite number of strings can generate the same hashed value. To login in this app and generate a JWT, a user passes a request containing a password string, it is then passed through the hashing method and compared to the stored, already-hashed password recorded and compared. If they have equal values, the user is returned a JWT.
 
-psycopg2
+### psycopg2-binary==2.9.9
 
-marshmallow-sqlalchemy==1.0.0
+Pyscopg2-binary is utilised in the app for connecting the application to a local PostgreSQL database. Psycopg2 creates the route string which is passed to Flask that designates which socket the database will be hosted at and includes the app's PostgreSQL authentication for exchanges with the database including user name and password. Psycopg2 is responsible for actually sending the data, generated using SQLAlchemy, to the database.
 
-python-dotenv==1.0.1
+### python-dotenv==1.0.1
 
-### References
-
-GeeksforGeeks (2024) _[What is Object-Relational Mapping (ORM) in DBMS?](https://www.geeksforgeeks.org/what-is-object-relational-mapping-orm-in-dbms/)_, GeeksforGeeks website, accessed 30 June 2024.
+Python-dotenv allows the application to access data stored in ".env" files. In this app, the JWT secret key value is stored in the env file so that it can remain hidden and generated locally when the app is cloned. It also stores the psycopg routing string to hide it from users.
 
 ## R4. Explain the benefits and drawbacks of this app’s underlying database system /6
 

@@ -5,7 +5,7 @@ from sqlalchemy.orm import DeclarativeBase
 from flask_marshmallow import Marshmallow
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
-from sqlalchemy.exc import IntegrityError
+
 
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = environ.get("JWT_KEY")
